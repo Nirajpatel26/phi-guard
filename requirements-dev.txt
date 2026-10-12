@@ -1,0 +1,10 @@
+# Local tooling + tests. The scanner's heavy deps (Presidio, spaCy) live in
+# detector/presidio/requirements.txt and run in a container; install them locally
+# only if you want `make measure-offline` to use real Presidio instead of the lite engine.
+pyyaml>=6.0
+pydantic>=2.7,<3
+jinja2>=3.1
+requests>=2.31
+pytest>=8.0
+fastapi>=0.110
+uvicorn>=0.29

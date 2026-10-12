@@ -1,0 +1,25 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Generated
+build/
+app/sample-ehr/data/patients.json
+evidence/*
+!evidence/samples/
+!evidence/.gitkeep
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+tfplan.bin
+crash.log
+
+# Local secrets (never commit API keys)
+.env
+
+# Local tooling
+.claude/settings.local.json
