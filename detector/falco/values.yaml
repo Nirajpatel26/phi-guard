@@ -1,0 +1,25 @@
+# helm upgrade --install falco falcosecurity/falco -n falco -f detector/falco/values.yaml \
+#   --set-file 'customRules.phi_guard_rules\.yaml=detector/falco/phi_guard_rules.yaml'
+#
+# Driver: modern_ebpf (CO-RE, needs kernel >= 5.8 with BTF). Works on most Linux
+# hosts, WSL2 and recent Docker Desktop kernels. If it fails to load, try
+#   make detector-up FALCO_DRIVER=ebpf     (classic probe)
+#   make detector-up FALCO_DRIVER=kmod     (kernel module; Linux hosts only)
+driver:
+  kind: modern_ebpf
+
+tty: true
+
+falco:
+  json_output: true
+  json_include_output_property: true
+  json_include_tags_property: true
+  priority: notice
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi

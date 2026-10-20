@@ -1,0 +1,69 @@
+# PHI Guard custom Falco rules. Loaded through the Falco Helm chart:
+#   --set-file 'customRules.phi_guard_rules\.yaml=detector/falco/phi_guard_rules.yaml'
+#
+# Self-contained (does not depend on macros from the default ruleset) so it keeps
+# working if the default rules change. All rules are tagged phi_guard so
+# scripts/measure.py can separate them from Falco's built-in alerts.
+
+- list: phi_guard_namespaces
+  items: [phi]
+
+# kind defaults: pod CIDR 10.244.0.0/16, service CIDR 10.96.0.0/12 (see infra/kind/cluster.yaml)
+- list: phi_guard_allowed_egress_cidrs
+  items: ['"10.244.0.0/16"', '"10.96.0.0/12"', '"127.0.0.0/8"']
+
+- list: phi_guard_shells
+  items: [sh, bash, dash, ash, zsh, ksh, busybox]
+
+# Processes that legitimately read mounted secrets in PHI pods.
+- list: phi_guard_secret_readers
+  items: [uvicorn]
+
+- macro: phi_guard_pod
+  condition: (container.id != host and k8s.ns.name in (phi_guard_namespaces))
+
+- macro: phi_guard_outbound_connect
+  condition: >
+    (evt.type = connect and evt.dir = < and (fd.typechar = 4 or fd.typechar = 6)
+     and fd.ip != "0.0.0.0" and (evt.rawres >= 0 or evt.res = EINPROGRESS))
+
+- rule: PHI Guard - Unexpected egress from PHI pod
+  desc: >
+    A container in a PHI namespace opened an outbound connection to a destination
+    outside the cluster allowlist. Possible exfiltration (45 CFR §164.312(e)(1)).
+  condition: phi_guard_outbound_connect and phi_guard_pod and not fd.snet in (phi_guard_allowed_egress_cidrs)
+  output: >
+    PHI pod connected to non-allowlisted destination
+    (ns=%k8s.ns.name pod=%k8s.pod.name dest=%fd.sip:%fd.sport connection=%fd.name
+    proc=%proc.name cmdline=%proc.cmdline container_id=%container.id)
+  priority: WARNING
+  tags: [phi_guard, hipaa_164_312_e_1, network, mitre_exfiltration]
+
+- rule: PHI Guard - Shell spawned in PHI pod
+  desc: >
+    A shell started inside a container in a PHI namespace. Interactive access to
+    PHI workloads should go through audited break-glass procedures (45 CFR §164.312(a)(1), (b)).
+  condition: >
+    evt.type in (execve, execveat) and evt.dir = < and phi_guard_pod
+    and proc.name in (phi_guard_shells)
+  output: >
+    Shell spawned in PHI pod
+    (ns=%k8s.ns.name pod=%k8s.pod.name proc=%proc.name cmdline=%proc.cmdline
+    parent=%proc.pname user=%user.uid container_id=%container.id)
+  priority: WARNING
+  tags: [phi_guard, hipaa_164_312_a_1, process, mitre_execution]
+
+- rule: PHI Guard - Mounted secret read in PHI pod
+  desc: >
+    A process other than the application read a Kubernetes Secret mounted under
+    /etc/phi-secrets in a PHI pod (45 CFR §164.312(a)(1), (d)).
+  condition: >
+    evt.type in (open, openat, openat2) and evt.dir = < and evt.is_open_read = true
+    and fd.name startswith /etc/phi-secrets and phi_guard_pod
+    and not proc.name in (phi_guard_secret_readers)
+  output: >
+    Mounted PHI secret read
+    (ns=%k8s.ns.name pod=%k8s.pod.name file=%fd.name proc=%proc.name cmdline=%proc.cmdline
+    container_id=%container.id)
+  priority: WARNING
+  tags: [phi_guard, hipaa_164_312_d, filesystem, mitre_credential_access]
