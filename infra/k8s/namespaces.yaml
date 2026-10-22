@@ -1,0 +1,29 @@
+# Deployed by `make up`. The phi namespace is labelled so Rego, Checkov and Falco
+# can all key off the same classification.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: phi
+  labels:
+    data-classification: phi
+    audit.phi-guard.io/log: enabled
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: logging
+  labels:
+    data-classification: internal
+    # Fluent Bit reads /var/log/containers through a hostPath mount.
+    pod-security.kubernetes.io/enforce: privileged
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: falco
+  labels:
+    data-classification: internal
+    # Falco needs host access for its eBPF probe.
+    pod-security.kubernetes.io/enforce: privileged
