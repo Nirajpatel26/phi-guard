@@ -1,0 +1,83 @@
+# Presidio scanner service in the logging namespace. Fluent Bit posts to
+# http://phi-scanner.logging.svc.cluster.local:8080/ingest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phi-scanner
+  namespace: logging
+  labels:
+    app.kubernetes.io/name: phi-scanner
+    data-classification: internal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: phi-scanner
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: phi-scanner
+        data-classification: internal
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10002
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: scanner
+          image: phi-guard/phi-scanner:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: PHI_ENGINE
+              value: presidio
+            - name: OUTPUT_DIR
+              value: /data
+            # read-only root FS: give spaCy/tldextract a writable cache location
+            - name: HOME
+              value: /tmp
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 200m
+              memory: 768Mi
+            limits:
+              cpu: "1"
+              memory: 1536Mi
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phi-scanner
+  namespace: logging
+spec:
+  selector:
+    app.kubernetes.io/name: phi-scanner
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
