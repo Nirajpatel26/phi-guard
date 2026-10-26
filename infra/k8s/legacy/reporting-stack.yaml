@@ -1,0 +1,97 @@
+# INTENTIONALLY NON-COMPLIANT FIXTURE — scanned by PHI Guard, never deployed.
+# Models a "legacy reporting" stack that a team bolted on next to the EHR.
+# Every violation here is deliberate and listed in policies/waivers.yaml.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: phi-reporting
+  labels:
+    data-classification: phi          # holds PHI, but has no NetworkPolicy (PHI-K8S-07)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: report-exporter
+  namespace: phi-reporting
+  labels:
+    app.kubernetes.io/name: report-exporter   # no data-classification / audit labels (PHI-K8S-09)
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: report-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: report-exporter
+    spec:
+      # automountServiceAccountToken not disabled (PHI-K8S-11)
+      containers:
+        - name: exporter
+          image: phi-guard/report-exporter:latest   # mutable tag (PHI-K8S-05)
+          securityContext:
+            privileged: true                        # PHI-K8S-01
+            runAsUser: 0                            # runs as root (PHI-K8S-02)
+            allowPrivilegeEscalation: true          # PHI-K8S-10
+          env:
+            - name: DB_PASSWORD                     # hard-coded secret (PHI-K8S-06)
+              value: "not-a-real-password-demo-only"
+            - name: EXPORT_BUCKET
+              value: "phiguard-demo-legacy-exports"
+          # no resources.limits (PHI-K8S-04); root filesystem writable (PHI-K8S-03)
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nightly-extract
+  namespace: phi-reporting
+  labels:
+    app.kubernetes.io/name: nightly-extract
+    data-classification: phi
+    audit.phi-guard.io/log: enabled
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: nightly-extract
+            data-classification: phi
+            audit.phi-guard.io/log: enabled
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          containers:
+            - name: extract
+              image: phi-guard/extract:1.4.2
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: false       # PHI-K8S-03 (partially compliant workload)
+                # runAsNonRoot missing (PHI-K8S-02)
+              resources:
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: legacy-reports
+  namespace: phi-reporting
+  labels:
+    data-classification: phi
+spec:
+  ingressClassName: traefik
+  # no tls block -> PHI served over plain HTTP (PHI-K8S-08)
+  rules:
+    - host: reports.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: report-exporter
+                port:
+                  number: 8080

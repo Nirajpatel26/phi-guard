@@ -1,0 +1,41 @@
+# Compliant defaults. `make leak-on` flips leakMode with `helm upgrade --set leakMode=on`.
+image:
+  repository: phi-guard/sample-ehr
+  tag: "0.1.0"          # pinned; never "latest" (PHI-K8S-05)
+  pullPolicy: IfNotPresent
+
+leakMode: "off"
+# Not a secret: only used to make patient_ref hashes non-trivial in the demo.
+logHashSalt: "phi-guard-demo-salt"
+
+replicas: 1
+
+services:
+  - name: patient-api
+    module: patient_api
+    path: /patients
+  - name: claims-api
+    module: claims_api
+    path: /claims
+  - name: eligibility-api
+    module: eligibility_api
+    path: /eligibility
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 96Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+
+ingress:
+  enabled: true
+  className: traefik
+  host: localhost
+  tls:
+    enabled: true
+    secretName: phi-guard-tls   # created by `make tls` (self-signed)
+
+networkPolicy:
+  enabled: true

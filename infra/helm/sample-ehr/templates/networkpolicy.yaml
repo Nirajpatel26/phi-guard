@@ -1,0 +1,46 @@
+{{- if .Values.networkPolicy.enabled }}
+# Default-deny for the PHI namespace, then allow only what the app needs:
+# ingress from the ingress controller and from pods in this namespace,
+# egress to pods in this namespace and to cluster DNS.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: phi-default-deny
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sample-ehr.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: phi-allow-app
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sample-ehr.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: sample-ehr
+  policyTypes: ["Ingress", "Egress"]
+  ingress:
+    - from:
+        - podSelector: {}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+  egress:
+    - to:
+        - podSelector: {}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+{{- end }}

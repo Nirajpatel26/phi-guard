@@ -1,0 +1,21 @@
+# Traefik ingress controller for kind. Binds hostPorts 80/443 on the control-plane
+# node, which kind maps to localhost via extraPortMappings (infra/kind/cluster.yaml).
+nodeSelector:
+  ingress-ready: "true"
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+ports:
+  web:
+    hostPort: 80
+  websecure:
+    hostPort: 443
+service:
+  type: ClusterIP
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+providers:
+  kubernetesIngress:
+    enabled: true
