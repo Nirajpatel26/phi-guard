@@ -1,0 +1,568 @@
+# PHI Guard control catalogue: control ID -> HIPAA citation -> implementation.
+#
+# engine: rego     -> implemented in policies/rego/<scope>/*.rego; the Rego message
+#                     starts with "[<control id>]".
+# engine: checkov  -> implemented by the Checkov check IDs in `checks` (built-in
+#                     CKV_* or custom CKV_PHI_* in policies/checkov/).
+# resource_types / kinds -> what the control applies to; report.py uses them to
+#                     record PASS evidence for in-scope resources with no failure.
+# scope_tags        -> optional filter on the resource's data-classification tag.
+#
+# Mapping a technical check to a HIPAA implementation specification is an
+# interpretation, not legal advice. Several mappings (e.g. resource limits) are
+# defensible-but-indirect and are labelled `mapping_strength: indirect`.
+version: 1
+framework: "HIPAA Security Rule - 45 CFR §164.312 Technical Safeguards"
+
+citations:
+  "45 CFR §164.312(a)(1)": "Access control"
+  "45 CFR §164.312(a)(2)(iv)": "Encryption and decryption (addressable)"
+  "45 CFR §164.312(b)": "Audit controls"
+  "45 CFR §164.312(c)(1)": "Integrity"
+  "45 CFR §164.312(d)": "Person or entity authentication"
+  "45 CFR §164.312(e)(1)": "Transmission security"
+  "45 CFR §164.312(e)(2)(ii)": "Encryption (transmission, addressable)"
+
+controls:
+  # ------------------------------------------------------------------ AWS / Terraform
+  - id: PHI-AC-01
+    title: S3 buckets block all public access
+    citation: "45 CFR §164.312(a)(1)"
+    severity: HIGH
+    scope: terraform
+    engine: rego
+    resource_types: [aws_s3_bucket]
+    risk: A bucket without a full public access block can be exposed by a single ACL or policy change, making every stored record readable from the internet.
+    remediation:
+      format: terraform
+      snippet: |
+        resource "aws_s3_bucket_public_access_block" "<name>" {
+          bucket                  = aws_s3_bucket.<name>.id
+          block_public_acls       = true
+          block_public_policy     = true
+          ignore_public_acls      = true
+          restrict_public_buckets = true
+        }
+
+  - id: PHI-AC-02
+    title: RDS instances are not publicly accessible
+    citation: "45 CFR §164.312(a)(1)"
+    severity: HIGH
+    scope: terraform
+    engine: checkov
+    checks: [CKV_AWS_17]
+    risk: A publicly reachable database exposes PHI to credential stuffing and exploitation from anywhere on the internet.
+    remediation:
+      format: terraform
+      snippet: |
+        publicly_accessible = false
+
+  - id: PHI-AC-03
+    title: IAM policies do not grant wildcard admin ("*" on "*")
+    citation: "45 CFR §164.312(a)(1)"
+    severity: HIGH
+    scope: terraform
+    engine: rego
+    resource_types: [aws_iam_policy, aws_iam_role_policy, aws_iam_user_policy, aws_iam_group_policy]
+    risk: Wildcard admin breaks least privilege; any principal holding it can read, copy or delete PHI and disable audit logging.
+    remediation:
+      format: terraform
+      snippet: |
+        Statement = [{
+          Effect   = "Allow"
+          Action   = ["s3:GetObject"]                         # list exact actions
+          Resource = ["arn:aws:s3:::<bucket>/*"]              # list exact resources
+        }]
+
+  - id: PHI-AC-04
+    title: Security groups do not expose database ports to 0.0.0.0/0
+    citation: "45 CFR §164.312(a)(1)"
+    severity: HIGH
+    scope: terraform
+    engine: rego
+    resource_types: [aws_security_group, aws_vpc_security_group_ingress_rule, aws_security_group_rule]
+    risk: Database ports open to the internet allow direct connection attempts against systems storing PHI.
+    remediation:
+      format: terraform
+      snippet: |
+        ingress {
+          from_port   = 5432
+          to_port     = 5432
+          protocol    = "tcp"
+          cidr_blocks = ["10.20.0.0/16"]   # VPC / app subnets only
+        }
+
+  - id: PHI-AC-05
+    title: S3 bucket ACLs are not public
+    citation: "45 CFR §164.312(a)(1)"
+    severity: HIGH
+    scope: terraform
+    engine: rego
+    resource_types: [aws_s3_bucket_acl]
+    risk: public-read or authenticated-read ACLs grant object access to anyone (or any AWS account).
+    remediation:
+      format: terraform
+      snippet: |
+        acl = "private"   # better: remove the ACL and use BucketOwnerEnforced ownership
+
+  - id: PHI-AC-06
+    title: Subnets do not auto-assign public IPs
+    citation: "45 CFR §164.312(a)(1)"
+    severity: MEDIUM
+    scope: terraform
+    engine: checkov
+    checks: [CKV_AWS_130]
+    risk: Instances launched into auto-public subnets become internet-reachable by default.
+    remediation:
+      format: terraform
+      snippet: |
+        map_public_ip_on_launch = false
+
+  - id: PHI-ENC-01
+    title: PHI and audit S3 buckets use SSE-KMS with a customer-managed key
+    citation: "45 CFR §164.312(a)(2)(iv)"
+    severity: HIGH
+    scope: terraform
+    engine: rego
+    resource_types: [aws_s3_bucket]
+    scope_tags: [phi, audit]
+    risk: Without SSE-KMS, decryption is not separately access-controlled or auditable through KMS key policy and CloudTrail.
+    remediation:
+      format: terraform
+      snippet: |
+        resource "aws_s3_bucket_server_side_encryption_configuration" "<name>" {
+          bucket = aws_s3_bucket.<name>.id
+          rule {
+            apply_server_side_encryption_by_default {
+              sse_algorithm     = "aws:kms"
+              kms_master_key_id = aws_kms_key.phi.arn
+            }
+          }
+        }
+
+  - id: PHI-ENC-02
+    title: RDS storage is encrypted at rest
+    citation: "45 CFR §164.312(a)(2)(iv)"
+    severity: HIGH
+    scope: terraform
+    engine: checkov
+    checks: [CKV_AWS_16]
+    risk: Unencrypted database storage and snapshots expose PHI if volumes or snapshots are copied or shared.
+    remediation:
+      format: terraform
+      snippet: |
+        storage_encrypted = true
+        kms_key_id        = aws_kms_key.phi.arn
+
+  - id: PHI-ENC-03
+    title: KMS customer-managed keys have rotation enabled
+    citation: "45 CFR §164.312(a)(2)(iv)"
+    severity: MEDIUM
+    scope: terraform
+    engine: checkov
+    checks: [CKV_AWS_7]
+    risk: Keys that never rotate increase the impact window of a key compromise.
+    remediation:
+      format: terraform
+      snippet: |
+        enable_key_rotation = true
+
+  - id: PHI-ENC-04
+    title: CloudTrail logs are encrypted with a KMS CMK
+    citation: "45 CFR §164.312(a)(2)(iv)"
+    severity: MEDIUM
+    scope: terraform
+    engine: checkov
+    checks: [CKV_AWS_35]
+    risk: Audit logs reveal who accessed PHI and where; they need the same protection as the data.
+    remediation:
+      format: terraform
+      snippet: |
+        kms_key_id = aws_kms_key.phi.arn
+
+  - id: PHI-AU-01
+    title: CloudTrail is enabled in all regions
+    citation: "45 CFR §164.312(b)"
+    severity: HIGH
+    scope: terraform
+    engine: checkov
+    checks: [CKV_AWS_67]
+    risk: Single-region trails miss API activity in other regions, leaving gaps in the audit record.
+    remediation:
+      format: terraform
+      snippet: |
+        is_multi_region_trail         = true
+        include_global_service_events = true
+
+  - id: PHI-AU-02
+    title: PHI buckets have server access logging enabled
+    citation: "45 CFR §164.312(b)"
+    severity: MEDIUM
+    scope: terraform
+    engine: rego
+    resource_types: [aws_s3_bucket]
+    scope_tags: [phi]
+    risk: Without access logs there is no object-level record of who read or changed PHI.
+    remediation:
+      format: terraform
+      snippet: |
+        resource "aws_s3_bucket_logging" "<name>" {
+          bucket        = aws_s3_bucket.<name>.id
+          target_bucket = aws_s3_bucket.access_logs.id
+          target_prefix = "<name>/"
+        }
+
+  - id: PHI-AU-03
+    title: VPCs have flow logs enabled
+    citation: "45 CFR §164.312(b)"
+    severity: MEDIUM
+    scope: terraform
+    engine: rego
+    resource_types: [aws_vpc]
+    risk: Without flow logs, network-level access to PHI systems cannot be reconstructed during an investigation.
+    remediation:
+      format: terraform
+      snippet: |
+        resource "aws_flow_log" "<name>" {
+          vpc_id          = aws_vpc.<name>.id
+          traffic_type    = "ALL"
+          log_destination = aws_cloudwatch_log_group.flow_logs.arn
+          iam_role_arn    = aws_iam_role.flow_logs.arn
+        }
+
+  - id: PHI-AU-04
+    title: RDS instances export database logs to CloudWatch
+    citation: "45 CFR §164.312(b)"
+    severity: MEDIUM
+    scope: terraform
+    engine: rego
+    resource_types: [aws_db_instance]
+    risk: Database connection and query logs are the primary audit trail for access to structured PHI.
+    remediation:
+      format: terraform
+      snippet: |
+        enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
+
+  - id: PHI-INT-01
+    title: CloudTrail log file validation is enabled
+    citation: "45 CFR §164.312(c)(1)"
+    severity: HIGH
+    scope: terraform
+    engine: checkov
+    checks: [CKV_AWS_36]
+    risk: Without digest validation, tampering with or deleting audit log files cannot be proven or detected.
+    remediation:
+      format: terraform
+      snippet: |
+        enable_log_file_validation = true
+
+  - id: PHI-INT-02
+    title: PHI buckets have versioning enabled
+    citation: "45 CFR §164.312(c)(1)"
+    severity: MEDIUM
+    scope: terraform
+    engine: rego
+    resource_types: [aws_s3_bucket]
+    scope_tags: [phi]
+    risk: Without versioning, overwritten or deleted PHI objects cannot be recovered or compared.
+    remediation:
+      format: terraform
+      snippet: |
+        resource "aws_s3_bucket_versioning" "<name>" {
+          bucket = aws_s3_bucket.<name>.id
+          versioning_configuration { status = "Enabled" }
+        }
+
+  - id: PHI-INT-03
+    title: RDS instances have deletion protection
+    citation: "45 CFR §164.312(c)(1)"
+    severity: MEDIUM
+    scope: terraform
+    engine: checkov
+    checks: [CKV_PHI_AWS_1]
+    risk: A database holding PHI can be destroyed by a single API call or a mistaken terraform apply.
+    remediation:
+      format: terraform
+      snippet: |
+        deletion_protection = true
+
+  - id: PHI-INT-04
+    title: RDS backups are retained for at least 7 days
+    citation: "45 CFR §164.312(c)(1)"
+    severity: MEDIUM
+    scope: terraform
+    engine: rego
+    resource_types: [aws_db_instance]
+    risk: Short retention limits the ability to restore PHI to a known-good state after corruption or ransomware.
+    remediation:
+      format: terraform
+      snippet: |
+        backup_retention_period = 14
+
+  - id: PHI-AUTH-01
+    title: RDS instances use IAM database authentication
+    citation: "45 CFR §164.312(d)"
+    severity: MEDIUM
+    scope: terraform
+    engine: checkov
+    checks: [CKV_PHI_AWS_2]
+    risk: Static shared database passwords cannot tie a session to an individual identity.
+    remediation:
+      format: terraform
+      snippet: |
+        iam_database_authentication_enabled = true
+
+  - id: PHI-AUTH-02
+    title: IAM account password policy enforces length and complexity
+    citation: "45 CFR §164.312(d)"
+    severity: MEDIUM
+    scope: terraform
+    engine: rego
+    resource_types: [aws_iam_account_password_policy]
+    risk: Weak console passwords make it easier to impersonate a workforce member with access to PHI.
+    remediation:
+      format: terraform
+      snippet: |
+        resource "aws_iam_account_password_policy" "strict" {
+          minimum_password_length      = 14
+          require_lowercase_characters = true
+          require_uppercase_characters = true
+          require_numbers              = true
+          require_symbols              = true
+        }
+
+  - id: PHI-TX-01
+    title: PHI and audit buckets deny non-TLS requests
+    citation: "45 CFR §164.312(e)(1)"
+    severity: HIGH
+    scope: terraform
+    engine: rego
+    resource_types: [aws_s3_bucket]
+    scope_tags: [phi, audit]
+    risk: Without an aws:SecureTransport deny, clients can read or write PHI over unencrypted HTTP.
+    remediation:
+      format: terraform
+      snippet: |
+        Statement = [{
+          Sid       = "DenyInsecureTransport"
+          Effect    = "Deny"
+          Principal = "*"
+          Action    = "s3:*"
+          Resource  = ["arn:aws:s3:::<bucket>", "arn:aws:s3:::<bucket>/*"]
+          Condition = { Bool = { "aws:SecureTransport" = "false" } }
+        }]
+
+  - id: PHI-TX-02
+    title: RDS parameter group forces TLS (rds.force_ssl = 1)
+    citation: "45 CFR §164.312(e)(2)(ii)"
+    severity: HIGH
+    scope: terraform
+    engine: rego
+    resource_types: [aws_db_instance]
+    risk: Without rds.force_ssl, database clients may connect and transfer PHI in plaintext.
+    remediation:
+      format: terraform
+      snippet: |
+        resource "aws_db_parameter_group" "phi_pg" {
+          family = "postgres16"
+          parameter {
+            name  = "rds.force_ssl"
+            value = "1"
+          }
+        }
+        # and on the instance:
+        parameter_group_name = aws_db_parameter_group.phi_pg.name
+
+  - id: PHI-TX-03
+    title: Load balancer listeners use HTTPS with a TLS 1.2+ policy (HTTP only for redirects)
+    citation: "45 CFR §164.312(e)(2)(ii)"
+    severity: HIGH
+    scope: terraform
+    engine: rego
+    resource_types: [aws_lb_listener, aws_alb_listener]
+    risk: An HTTP listener that forwards traffic transmits PHI in cleartext between client and load balancer.
+    remediation:
+      format: terraform
+      snippet: |
+        default_action {
+          type = "redirect"
+          redirect {
+            port        = "443"
+            protocol    = "HTTPS"
+            status_code = "HTTP_301"
+          }
+        }
+
+  # ------------------------------------------------------------------ Kubernetes
+  - id: PHI-K8S-01
+    title: Containers are not privileged
+    citation: "45 CFR §164.312(a)(1)"
+    severity: HIGH
+    scope: kubernetes
+    engine: checkov
+    checks: [CKV_K8S_16]
+    risk: A privileged container has full access to the node and every other workload's data, including PHI volumes.
+    remediation:
+      format: yaml
+      snippet: |
+        securityContext:
+          privileged: false
+
+  - id: PHI-K8S-02
+    title: Containers run as non-root
+    citation: "45 CFR §164.312(a)(1)"
+    severity: HIGH
+    scope: kubernetes
+    engine: rego
+    kinds: [Deployment, StatefulSet, DaemonSet, Job, CronJob, Pod]
+    risk: Root inside a container makes container escape and lateral movement to PHI workloads far easier.
+    remediation:
+      format: yaml
+      snippet: |
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 10001
+
+  - id: PHI-K8S-03
+    title: Containers use a read-only root filesystem
+    citation: "45 CFR §164.312(c)(1)"
+    severity: MEDIUM
+    scope: kubernetes
+    engine: rego
+    kinds: [Deployment, StatefulSet, DaemonSet, Job, CronJob, Pod]
+    risk: A writable root filesystem lets an attacker modify application code or stage exfiltration tooling.
+    remediation:
+      format: yaml
+      snippet: |
+        securityContext:
+          readOnlyRootFilesystem: true
+        # mount an emptyDir at /tmp if the app needs scratch space
+
+  - id: PHI-K8S-04
+    title: Containers set CPU and memory limits
+    citation: "45 CFR §164.312(a)(1)"
+    mapping_strength: indirect
+    severity: LOW
+    scope: kubernetes
+    engine: checkov
+    checks: [CKV_K8S_11, CKV_K8S_13]
+    risk: Unbounded workloads can starve PHI services (availability) and make abuse harder to contain.
+    remediation:
+      format: yaml
+      snippet: |
+        resources:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+
+  - id: PHI-K8S-05
+    title: Images use a pinned tag, never "latest"
+    citation: "45 CFR §164.312(c)(1)"
+    severity: MEDIUM
+    scope: kubernetes
+    engine: checkov
+    checks: [CKV_K8S_14]
+    risk: Mutable tags mean the code processing PHI can change without review, breaking software integrity.
+    remediation:
+      format: yaml
+      snippet: |
+        image: phi-guard/report-exporter:1.0.0   # or pin by @sha256 digest
+
+  - id: PHI-K8S-06
+    title: No hard-coded secrets in container environment variables
+    citation: "45 CFR §164.312(a)(1)"
+    severity: HIGH
+    scope: kubernetes
+    engine: rego
+    kinds: [Deployment, StatefulSet, DaemonSet, Job, CronJob, Pod]
+    risk: Literal credentials in manifests leak through git history, kubectl describe and CI logs, granting database access to PHI.
+    remediation:
+      format: yaml
+      snippet: |
+        volumeMounts:
+          - name: db-credentials
+            mountPath: /etc/phi-secrets
+            readOnly: true
+        # volumes: - name: db-credentials / secret: { secretName: phi-db-credentials }
+
+  - id: PHI-K8S-07
+    title: PHI namespaces have a default-deny NetworkPolicy
+    citation: "45 CFR §164.312(e)(1)"
+    severity: HIGH
+    scope: kubernetes
+    engine: rego
+    kinds: [Namespace]
+    scope_labels: {data-classification: phi}
+    risk: Without a NetworkPolicy any pod in the cluster can reach PHI services, and PHI pods can send data anywhere.
+    remediation:
+      format: yaml
+      snippet: |
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        metadata:
+          name: default-deny
+          namespace: <namespace>
+        spec:
+          podSelector: {}
+          policyTypes: ["Ingress", "Egress"]
+
+  - id: PHI-K8S-08
+    title: Ingresses terminate TLS
+    citation: "45 CFR §164.312(e)(2)(ii)"
+    severity: HIGH
+    scope: kubernetes
+    engine: rego
+    kinds: [Ingress]
+    risk: An Ingress without TLS serves PHI over plain HTTP between the client and the cluster edge.
+    remediation:
+      format: yaml
+      snippet: |
+        spec:
+          tls:
+            - hosts: ["<host>"]
+              secretName: <host>-tls
+
+  - id: PHI-K8S-09
+    title: Workloads carry data-classification and audit logging labels
+    citation: "45 CFR §164.312(b)"
+    severity: MEDIUM
+    scope: kubernetes
+    engine: checkov
+    checks: [CKV_PHI_K8S_1]
+    risk: Unlabelled workloads fall outside log collection and PHI-specific runtime rules, creating audit blind spots.
+    remediation:
+      format: yaml
+      snippet: |
+        template:
+          metadata:
+            labels:
+              data-classification: phi
+              audit.phi-guard.io/log: enabled
+
+  - id: PHI-K8S-10
+    title: Containers disallow privilege escalation
+    citation: "45 CFR §164.312(a)(1)"
+    severity: HIGH
+    scope: kubernetes
+    engine: checkov
+    checks: [CKV_K8S_20]
+    risk: allowPrivilegeEscalation lets a compromised process gain more rights than the container was granted.
+    remediation:
+      format: yaml
+      snippet: |
+        securityContext:
+          allowPrivilegeEscalation: false
+
+  - id: PHI-K8S-11
+    title: Pods do not auto-mount service account tokens
+    citation: "45 CFR §164.312(d)"
+    severity: MEDIUM
+    scope: kubernetes
+    engine: rego
+    kinds: [Deployment, StatefulSet, DaemonSet, Job, CronJob, Pod]
+    risk: An auto-mounted token lets anyone who compromises the pod authenticate to the Kubernetes API as that workload.
+    remediation:
+      format: yaml
+      snippet: |
+        spec:
+          automountServiceAccountToken: false

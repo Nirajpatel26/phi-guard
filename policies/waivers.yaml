@@ -1,0 +1,29 @@
+# Documented risk acceptances. A waived failure still appears in the evidence
+# report (status WAIVED, with reason/owner/expiry) but does not fail the pipeline.
+#
+# Everything below covers the INTENTIONAL non-compliant fixtures in this repo, so
+# CI stays green while the report still shows the violations. `make report-strict`
+# ignores this file and demonstrates the HIGH-severity gate failing.
+#
+# `resource` supports shell-style globs. Expired waivers are ignored automatically.
+waivers:
+  - control: "*"
+    resource: "aws_*.legacy*"
+    reason: Intentional non-compliant Terraform fixture used to demonstrate detection.
+    owner: phi-guard-maintainer
+    expires: "2027-06-30"
+  - control: "*"
+    resource: "aws_iam_policy.break_glass_admin"
+    reason: Intentional non-compliant fixture (wildcard admin) used to demonstrate PHI-AC-03.
+    owner: phi-guard-maintainer
+    expires: "2027-06-30"
+  - control: "*"
+    resource: "*/phi-reporting/*"
+    reason: infra/k8s/legacy is a scan-only fixture and is never deployed.
+    owner: phi-guard-maintainer
+    expires: "2027-06-30"
+  - control: "*"
+    resource: "Namespace/phi-reporting"
+    reason: infra/k8s/legacy is a scan-only fixture and is never deployed.
+    owner: phi-guard-maintainer
+    expires: "2027-06-30"
