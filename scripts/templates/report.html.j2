@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PHI Guard Evidence</title>
+<style>
+  :root { --bg:#f7f7f5; --panel:#fff; --ink:#1d2125; --muted:#5f6b76; --line:#e2e4e7;
+          --fail:#b42318; --fail-bg:#fdecea; --pass:#1a7f37; --pass-bg:#e7f5ea; --waive:#8a5a00; --waive-bg:#fff4dc; --ne:#5f6b76; --ne-bg:#eef0f2; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171a; --panel:#1c2024; --ink:#e7e9ea; --muted:#9aa4ad; --line:#2d3338;
+            --fail:#ff8a80; --fail-bg:#3a1c1a; --pass:#7ee2a0; --pass-bg:#173222; --waive:#ffd27a; --waive-bg:#3a2e12; --ne:#9aa4ad; --ne-bg:#262b30; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:1200px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { font-size:22px; margin:0 0 4px; } h2 { font-size:17px; margin:32px 0 8px; }
+  .muted { color:var(--muted); }
+  .banner { background:var(--waive-bg); color:var(--waive); padding:10px 14px; border-radius:8px; margin:12px 0; font-weight:600; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin:16px 0; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .card .v { font-size:22px; font-weight:650; } .card .k { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  .table-wrap { overflow-x:auto; background:var(--panel); border:1px solid var(--line); border-radius:10px; }
+  table { border-collapse:collapse; width:100%; min-width:760px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:12px; color:var(--muted); font-weight:600; background:var(--panel); position:sticky; top:0; }
+  tr:last-child td { border-bottom:none; }
+  code { font:12px ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .pill { display:inline-block; padding:1px 8px; border-radius:999px; font-size:12px; font-weight:600; }
+  .FAIL { color:var(--fail); background:var(--fail-bg); } .PASS { color:var(--pass); background:var(--pass-bg); }
+  .WAIVED { color:var(--waive); background:var(--waive-bg); } .NOT_EVALUATED { color:var(--ne); background:var(--ne-bg); }
+  .sev-HIGH { font-weight:700; }
+  .note { font-size:12px; color:var(--muted); margin-top:4px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>PHI Guard — HIPAA Technical Safeguards Evidence</h1>
+  <div class="muted">{{ r.framework }} · commit <code>{{ r.commit[:12] }}</code> · {{ r.generated_at }} UTC</div>
+  {% if r.banner %}<div class="banner">{{ r.banner }}</div>{% endif %}
+
+  <div class="cards">
+    <div class="card"><div class="k">Controls evaluated</div><div class="v">{{ r.summary.controls_evaluated }} / {{ r.summary.controls_defined }}</div></div>
+    <div class="card"><div class="k">Pass</div><div class="v">{{ r.summary.pass }}</div></div>
+    <div class="card"><div class="k">Fail (unwaived)</div><div class="v">{{ r.summary.fail }}</div></div>
+    <div class="card"><div class="k">Waived</div><div class="v">{{ r.summary.waived }}</div></div>
+    <div class="card"><div class="k">Unwaived HIGH</div><div class="v">{{ r.summary.unwaived_fail_by_severity.HIGH }}</div></div>
+  </div>
+  <div class="note">Tools: {% for name, t in r.tools.items() %}{{ name }} {{ "ran" if t.ran else "skipped" }}{% if t.note %} ({{ t.note }}){% endif %}{{ " · " if not loop.last }}{% endfor %}.
+    Waivers {{ "applied" if r.waivers_applied else "ignored (strict mode)" }}. Academic project on synthetic data — not a certified compliance assessment.</div>
+
+  <h2>Control status</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Control</th><th>Citation</th><th>Severity</th><th>Status</th><th>Title</th></tr></thead>
+    <tbody>
+    {% for c in controls %}
+      {% set st = r.summary.control_status[c.id] %}
+      <tr><td><code>{{ c.id }}</code></td><td>{{ c.citation }}</td><td class="sev-{{ c.severity }}">{{ c.severity }}</td>
+          <td><span class="pill {{ st }}">{{ st | replace("_", " ") }}</span></td><td>{{ c.title }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+
+  {% for g in groups %}
+  <h2>{{ g.citation }} — {{ g.safeguard }}</h2>
+  <div class="muted">{{ g.fail }} fail · {{ g.waived }} waived · {{ g.pass }} pass</div>
+  {% if g.rows %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Status</th><th>Control</th><th>Sev</th><th>Resource</th><th>Location</th><th>Check</th><th>Detail</th></tr></thead>
+    <tbody>
+    {% for row in g.rows %}
+      <tr>
+        <td><span class="pill {{ row.status }}">{{ row.status }}</span></td>
+        <td><code>{{ row.control_id }}</code></td>
+        <td class="sev-{{ row.severity }}">{{ row.severity }}</td>
+        <td><code>{{ row.resource }}</code></td>
+        <td><code>{{ row.file or "—" }}{% if row.line %}:{{ row.line }}{% endif %}</code></td>
+        <td>{{ row.engine }}<br><code>{{ row.check_id }}</code></td>
+        <td>{{ row.message }}{% if row.waiver %}<div class="note">Waived: {{ row.waiver.reason }} · owner {{ row.waiver.owner }} · expires {{ row.waiver.expires }}</div>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}<p class="muted">No in-scope resources.</p>{% endif %}
+  {% endfor %}
+</main>
+</body>
+</html>

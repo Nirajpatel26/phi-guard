@@ -1,0 +1,44 @@
+# PHI Guard — HIPAA Technical Safeguards Evidence Report
+
+{% if r.banner %}> **{{ r.banner }}**
+
+{% endif %}
+| | |
+|---|---|
+| Framework | {{ r.framework }} |
+| Commit | `{{ r.commit }}` |
+| Generated (UTC) | {{ r.generated_at }} |
+| Controls evaluated | {{ r.summary.controls_evaluated }} / {{ r.summary.controls_defined }} |
+| Results | {{ r.summary.pass }} pass · {{ r.summary.fail }} fail · {{ r.summary.waived }} waived |
+| Unwaived failures | HIGH {{ r.summary.unwaived_fail_by_severity.HIGH }} · MEDIUM {{ r.summary.unwaived_fail_by_severity.MEDIUM }} · LOW {{ r.summary.unwaived_fail_by_severity.LOW }} |
+| Waivers applied | {{ "yes" if r.waivers_applied else "no (strict mode)" }} |
+
+**Tools:** {% for name, t in r.tools.items() %}`{{ name }}` {{ "ran" if t.ran else "skipped" }}{% if t.note %} ({{ t.note }}){% endif %}{{ " · " if not loop.last }}{% endfor %}
+
+> Automated evidence for an academic project using synthetic data. Not a certified
+> compliance assessment; mapping checks to HIPAA implementation specifications is an interpretation.
+
+## Control status
+
+| Control | Citation | Severity | Status | Title |
+|---|---|---|---|---|
+{% for c in controls %}
+| {{ c.id }} | {{ c.citation }} | {{ c.severity }} | {{ r.summary.control_status[c.id] }} | {{ c.title }} |
+{% endfor %}
+
+{% for g in groups %}
+## {{ g.citation }} — {{ g.safeguard }}
+
+{{ g.fail }} fail · {{ g.waived }} waived · {{ g.pass }} pass
+
+{% if g.rows %}
+| Status | Control | Sev | Resource | Location | Engine / check | Detail |
+|---|---|---|---|---|---|---|
+{% for row in g.rows %}
+| {{ row.status }} | {{ row.control_id }} | {{ row.severity }} | `{{ row.resource }}` | {{ row.file or "—" }}{% if row.line %}:{{ row.line }}{% endif %} | {{ row.engine }} / {{ row.check_id }} | {{ row.message | replace("|", "\\|") }}{% if row.waiver %} — *waived: {{ row.waiver.reason }} (expires {{ row.waiver.expires }})*{% endif %} |
+{% endfor %}
+{% else %}
+_No in-scope resources._
+{% endif %}
+
+{% endfor %}
