@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PHI Guard Demo</title>
+<style>
+  :root { --bg:#f6f6f3; --panel:#ffffff; --ink:#1b1f23; --muted:#5d6872; --line:#e1e3e6; --accent:#0f5f8c; --accent-bg:#e6f1f8;
+          --fail:#b42318; --fail-bg:#fdecea; --pass:#1a7f37; --pass-bg:#e7f5ea; --warn:#8a5a00; --warn-bg:#fff4dc; --code-bg:#f2f3f5; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131619; --panel:#1b1f23; --ink:#e6e8ea; --muted:#9aa4ad; --line:#2c3238; --accent:#7cc4ee; --accent-bg:#14303f;
+            --fail:#ff8a80; --fail-bg:#3a1c1a; --pass:#7ee2a0; --pass-bg:#173222; --warn:#ffd27a; --warn-bg:#3a2e12; --code-bg:#22272c; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.55 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:1120px; margin:0 auto; padding:28px 16px 64px; }
+  h1 { font-size:24px; margin:0; letter-spacing:-.01em; }
+  h2 { font-size:17px; margin:36px 0 6px; }
+  p { margin:6px 0; }
+  .muted { color:var(--muted); }
+  .note { background:var(--accent-bg); color:var(--ink); border-radius:10px; padding:12px 14px; margin:16px 0; }
+  .note.warn { background:var(--warn-bg); }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin:18px 0 6px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .card .k { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .card .v { font-size:26px; font-weight:650; margin-top:2px; }
+  .card .s { font-size:12px; color:var(--muted); }
+  .wrap { overflow-x:auto; background:var(--panel); border:1px solid var(--line); border-radius:12px; margin-top:10px; }
+  table { border-collapse:collapse; width:100%; min-width:720px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:12px; color:var(--muted); font-weight:600; }
+  tr:last-child td { border-bottom:none; }
+  code, pre { font:12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  td code { background:var(--code-bg); padding:1px 5px; border-radius:5px; word-break:break-word; }
+  pre { background:var(--code-bg); padding:10px 12px; border-radius:8px; overflow-x:auto; margin:8px 0 0; }
+  .pill { display:inline-block; padding:1px 8px; border-radius:999px; font-size:12px; font-weight:600; white-space:nowrap; }
+  .ok { color:var(--pass); background:var(--pass-bg); } .bad { color:var(--fail); background:var(--fail-bg); } .neutral { color:var(--warn); background:var(--warn-bg); }
+  .tag { display:inline-block; font-size:11px; padding:0 6px; margin:1px 2px 1px 0; border-radius:5px; background:var(--accent-bg); color:var(--accent); }
+  .bar { height:8px; background:var(--line); border-radius:99px; overflow:hidden; min-width:120px; }
+  .bar span { display:block; height:100%; background:var(--accent); }
+  .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; }
+  .tri { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .tri h3 { font-size:14px; margin:0 0 4px; }
+  footer { margin-top:40px; font-size:12px; color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>PHI Guard — offline demo run</h1>
+  <div class="muted">{{ d.generated_at }} UTC · Python {{ d.python }} · detection engine <code>{{ d.engine }}</code> · {{ d.seconds }}s · {{ d.patients }} synthetic patients</div>
+
+  <div class="note">This run used only Python: the services' logging code, the PHI scanner, the 50-leak scoring, the control catalogue,
+    the CI gate logic and the triage assistant. The Kubernetes cluster, Fluent Bit, Falco and the real Terraform + Conftest + Checkov
+    scan run with <code>make demo</code>.</div>
+  {% if d.engine == "lite" %}
+  <div class="note warn"><strong>Lite engine:</strong> regex recognizers only, no NER model. Presidio + spaCy results come from
+    <code>make demo</code> (in-cluster scanner) or from installing <code>detector/presidio/requirements.txt</code> locally.</div>
+  {% endif %}
+
+  {% set s = d.seeded.score %}
+  <div class="cards">
+    <div class="card"><div class="k">HIPAA controls</div><div class="v">{{ d.controls.implemented }}/{{ d.controls.defined }}</div><div class="s">implemented · goal 25+</div></div>
+    <div class="card"><div class="k">Log leaks caught</div><div class="v">{{ s.log.caught }}/{{ s.log.total }}</div><div class="s">seeded, labelled</div></div>
+    <div class="card"><div class="k">Decoys flagged</div><div class="v">{{ s.false_positives.decoys_flagged }}/{{ s.false_positives.decoys_total }}</div><div class="s">false positives</div></div>
+    <div class="card"><div class="k">Precision · recall</div><div class="v">{{ "%.2f"|format(s.precision or 0) }} · {{ "%.2f"|format(s.recall or 0) }}</div><div class="s">over the 40 log leaks</div></div>
+    <div class="card"><div class="k">LEAK_MODE off → on</div><div class="v">{{ d.app_logging.off_alerts }} → {{ d.app_logging.on_alerts }}</div><div class="s">lines flagged of {{ d.app_logging.on|length }}</div></div>
+  </div>
+
+  <h2>1 · Service logs with LEAK_MODE off vs on</h2>
+  <p class="muted">The same call sites in patient-api, claims-api and eligibility-api. Off logs a salted hash; on logs PHI in rotating formats.</p>
+  <div class="wrap"><table>
+    <thead><tr><th>Mode</th><th>Service</th><th>Log line (synthetic)</th><th>After masking</th><th>Detected</th></tr></thead>
+    <tbody>
+    {% for r in d.app_logging.off[:3] %}
+      <tr><td><span class="pill ok">off</span></td><td>{{ r.service }}</td><td><code>{{ r.line }}</code></td><td><code>{{ r.masked }}</code></td>
+          <td>{% for e in r.entities %}<span class="tag">{{ e }}</span>{% else %}<span class="muted">nothing</span>{% endfor %}</td></tr>
+    {% endfor %}
+    {% for r in d.app_logging.on[:8] %}
+      <tr><td><span class="pill bad">on</span></td><td>{{ r.service }}</td><td><code>{{ r.line }}</code></td><td><code>{{ r.masked }}</code></td>
+          <td>{% for e in r.entities %}<span class="tag">{{ e }}</span>{% else %}<span class="muted">nothing</span>{% endfor %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+
+  <h2>2 · 50 labelled leaks: detection score</h2>
+  <p class="muted">40 log leaks and 30 decoys scored here; the {{ d.seeded.runtime_events|length }} runtime events (egress, shell spawn, secret read) need Falco in the cluster and are not evaluated in this run.
+    Missed: {% for m in s.missed %}<code>{{ m }}</code> {% else %}none{% endfor %}</p>
+  <div class="grid2">
+    <div class="wrap"><table style="min-width:0">
+      <thead><tr><th>Entity</th><th>Recall</th><th></th></tr></thead>
+      <tbody>
+      {% for ent, val in s.per_entity_recall.items() %}
+        <tr><td>{{ ent }}</td><td>{{ "%.0f"|format(val * 100) }}%</td><td><div class="bar"><span style="width:{{ (val * 100)|round(0) }}%"></span></div></td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <div class="wrap"><table style="min-width:0">
+      <thead><tr><th>Decoy (should be ignored)</th><th>Result</th></tr></thead>
+      <tbody>
+      {% for dcy in d.seeded.decoys[:10] %}
+        <tr><td><code>{{ dcy.line }}</code></td><td>{% if dcy.flagged %}<span class="pill bad">flagged {{ dcy.found|join(", ") }}</span>{% else %}<span class="pill ok">ignored</span>{% endif %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+  <div class="wrap"><table>
+    <thead><tr><th>Leak format</th><th>Seeded line (synthetic)</th><th>After masking</th><th>Expected</th><th>Result</th></tr></thead>
+    <tbody>
+    {% for ex in d.seeded.examples %}
+      <tr><td>{{ ex.template }}</td><td><code>{{ ex.line }}</code></td><td><code>{{ ex.masked }}</code></td>
+          <td>{% for e in ex.expected %}<span class="tag">{{ e }}</span>{% endfor %}</td>
+          <td>{% if ex.detected %}<span class="pill ok">caught</span>{% else %}<span class="pill bad">missed</span>{% endif %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+
+  <h2>3 · HIPAA control catalogue</h2>
+  <p class="muted">{{ d.controls.implemented }} of {{ d.controls.defined }} controls have an implementing check ({{ d.controls.by_engine.rego }} Rego, {{ d.controls.by_engine.checkov }} Checkov). Counted from policies/mapping.yaml and the policy files.</p>
+  <div class="wrap"><table>
+    <thead><tr><th>45 CFR citation</th><th>Controls</th></tr></thead>
+    <tbody>
+    {% for cit, n in d.controls.by_citation.items() %}
+      <tr><td>{{ cit }}</td><td>{{ n }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+
+  <h2>4 · CI gate on sample findings</h2>
+  <p class="muted">Sample tool output from tests/fixtures (the real scan needs Terraform, Conftest and Checkov).</p>
+  <div class="cards">
+    <div class="card"><div class="k">Strict (no waivers)</div><div class="v">{% if d.gate.strict.exit_code %}<span class="pill bad">FAIL</span>{% else %}<span class="pill ok">PASS</span>{% endif %}</div><div class="s">{{ d.gate.strict.high }} unwaived HIGH findings</div></div>
+    <div class="card"><div class="k">With waivers</div><div class="v">{% if d.gate.with_waivers.exit_code %}<span class="pill bad">FAIL</span>{% else %}<span class="pill ok">PASS</span>{% endif %}</div><div class="s">{{ d.gate.with_waivers.waived }} documented waivers</div></div>
+  </div>
+
+  <h2>5 · LLM triage examples</h2>
+  <p class="muted">Provider: <code>{{ d.triage_provider }}</code>{% if d.triage_note %} ({{ d.triage_note }}){% endif %}. Every answer is schema-validated and cross-checked against mapping.yaml.</p>
+  <div class="grid2">
+  {% for item in d.triage %}
+    {% set f = item.finding %}{% set t = item.triage %}
+    <div class="tri">
+      <h3>{{ f.control_id }} · <code>{{ f.resource }}</code></h3>
+      <div class="muted">{{ t.hipaa_citation }} · {{ t.severity }} · {{ f.file }}{% if f.line %}:{{ f.line }}{% endif %} · source {{ t.source }}</div>
+      <p>{{ t.risk_summary }}</p>
+      <pre>{{ t.suggested_fix.diff }}</pre>
+    </div>
+  {% endfor %}
+  </div>
+
+  <footer>Synthetic data only. Academic project, not a certified compliance tool. Full run: <code>make demo</code> · this page: <code>make demo-offline</code></footer>
+</main>
+</body>
+</html>
