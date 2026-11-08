@@ -1,0 +1,16 @@
+{
+  "format_version": "1.2",
+  "resource_changes": [
+    {"address": "aws_s3_bucket.phi_records", "type": "aws_s3_bucket", "name": "phi_records",
+     "change": {"actions": ["create"], "after": {"bucket": "phiguard-demo-phi-records", "tags": {"data-classification": "phi"}}}},
+    {"address": "aws_s3_bucket.access_logs", "type": "aws_s3_bucket", "name": "access_logs",
+     "change": {"actions": ["create"], "after": {"bucket": "phiguard-demo-access-logs", "tags": {"data-classification": "internal"}}}},
+    {"address": "aws_s3_bucket.legacy_exports", "type": "aws_s3_bucket", "name": "legacy_exports",
+     "change": {"actions": ["create"], "after": {"bucket": "phiguard-demo-legacy-exports", "tags": {"data-classification": "phi"}}}},
+    {"address": "aws_db_instance.phi_primary", "type": "aws_db_instance", "name": "phi_primary",
+     "change": {"actions": ["create"], "after": {"backup_retention_period": 14}}},
+    {"address": "aws_db_instance.legacy_reporting", "type": "aws_db_instance", "name": "legacy_reporting",
+     "change": {"actions": ["create"], "after": {"backup_retention_period": 1}}}
+  ],
+  "configuration": {"root_module": {"resources": []}}
+}

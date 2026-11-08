@@ -1,0 +1,12 @@
+[
+  {"filename": "Combined", "namespace": "hipaa.k8s.access_control", "successes": 0,
+   "failures": [
+     {"msg": "[PHI-K8S-02] Deployment/phi-reporting/report-exporter @ infra/k8s/legacy/reporting-stack.yaml :: container \"exporter\" does not enforce runAsNonRoot"},
+     {"msg": "[PHI-K8S-06] Deployment/phi-reporting/report-exporter @ infra/k8s/legacy/reporting-stack.yaml :: container \"exporter\" sets DB_PASSWORD to a literal value; mount a Secret as a file instead"}
+   ]},
+  {"filename": "Combined", "namespace": "hipaa.k8s.transmission", "successes": 0,
+   "failures": [
+     {"msg": "[PHI-K8S-08] Ingress/phi-reporting/legacy-reports @ infra/k8s/legacy/reporting-stack.yaml :: Ingress has no spec.tls; traffic is served over plain HTTP"},
+     {"msg": "something without the expected prefix"}
+   ]}
+]

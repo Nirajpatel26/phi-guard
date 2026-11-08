@@ -1,0 +1,9 @@
+[
+  {"filename": "build/tfplan.json", "namespace": "hipaa.tf.access_control", "successes": 3,
+   "failures": [{"msg": "[PHI-AC-01] aws_s3_bucket.legacy_exports :: no aws_s3_bucket_public_access_block with all four flags set to true"}]},
+  {"filename": "build/tfplan.json", "namespace": "hipaa.tf.encryption", "successes": 1,
+   "failures": [{"msg": "[PHI-ENC-01] aws_s3_bucket.legacy_exports :: bucket is not encrypted with SSE-KMS (aws:kms) using a customer-managed key"}]},
+  {"filename": "build/tfplan.json", "namespace": "hipaa.tf.integrity", "successes": 1,
+   "failures": [{"msg": "[PHI-INT-04] aws_db_instance.legacy_reporting :: backup_retention_period is 1 days (minimum 7)"}]},
+  {"filename": "build/tfplan.json", "namespace": "hipaa.tf.audit", "successes": 3, "failures": null}
+]

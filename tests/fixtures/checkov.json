@@ -1,0 +1,32 @@
+[
+  {
+    "check_type": "terraform",
+    "results": {
+      "passed_checks": [
+        {"check_id": "CKV_AWS_16", "check_name": "Ensure all data stored in the RDS is securely encrypted at rest",
+         "resource": "aws_db_instance.phi_primary", "file_path": "/rds.tf", "file_line_range": [24, 50]}
+      ],
+      "failed_checks": [
+        {"check_id": "CKV_AWS_16", "check_name": "Ensure all data stored in the RDS is securely encrypted at rest",
+         "resource": "aws_db_instance.legacy_reporting", "file_path": "/rds.tf", "file_line_range": [63, 78]},
+        {"check_id": "CKV_PHI_AWS_1", "check_name": "PHI Guard: RDS instance holding PHI has deletion protection enabled",
+         "resource": "aws_db_instance.legacy_reporting", "file_path": "/rds.tf", "file_line_range": [63, 78]},
+        {"check_id": "CKV_AWS_7", "check_name": "Ensure rotation for customer created CMKs is enabled",
+         "resource": "aws_kms_key.legacy", "file_path": "/kms.tf", "file_line_range": [16, 21]}
+      ]
+    }
+  },
+  {
+    "check_type": "kubernetes",
+    "results": {
+      "passed_checks": [
+        {"check_id": "CKV_K8S_16", "check_name": "Container should not be privileged",
+         "resource": "Deployment.phi.patient-api", "file_path": "/rendered/sample-ehr.yaml", "file_line_range": [60, 120]}
+      ],
+      "failed_checks": [
+        {"check_id": "CKV_K8S_16", "check_name": "Container should not be privileged",
+         "resource": "Deployment.phi-reporting.report-exporter", "file_path": "/legacy/reporting-stack.yaml", "file_line_range": [11, 40]}
+      ]
+    }
+  }
+]
