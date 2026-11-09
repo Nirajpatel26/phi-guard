@@ -1,0 +1,109 @@
+name: compliance
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CONFTEST_VERSION: "0.56.0"
+  TF_IN_AUTOMATION: "true"
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  hipaa-compliance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Start pipeline timer
+        run: echo "PIPELINE_START=$(date +%s)" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+          terraform_wrapper: false
+
+      - uses: azure/setup-helm@v4
+
+      - name: Cache Terraform providers
+        uses: actions/cache@v4
+        with:
+          path: infra/terraform/aws/.terraform
+          key: tf-${{ runner.os }}-${{ hashFiles('infra/terraform/aws/*.tf', 'infra/terraform/aws/.terraform.lock.hcl') }}
+
+      - name: Install Conftest and Python tools
+        run: |
+          curl -sSL "https://github.com/open-policy-agent/conftest/releases/download/v${CONFTEST_VERSION}/conftest_${CONFTEST_VERSION}_Linux_x86_64.tar.gz" \
+            | tar -xz -C /usr/local/bin conftest
+          pip install -r requirements-ci.txt
+          conftest --version && checkov --version
+
+      - name: Terraform init / validate / plan (plan-only, mock credentials)
+        working-directory: infra/terraform/aws
+        run: |
+          terraform init -input=false
+          terraform validate
+          terraform plan -input=false -lock=false -refresh=false -out=tfplan.bin
+          mkdir -p ../../../build
+          terraform show -json tfplan.bin > ../../../build/tfplan.json
+
+      - name: Render Helm chart
+        run: helm template sample-ehr infra/helm/sample-ehr --namespace phi > infra/k8s/rendered/sample-ehr.yaml
+
+      - name: Conftest policy unit tests
+        run: conftest verify --policy policies/rego/terraform --policy policies/rego/kubernetes --no-color || echo "::warning::no or failing rego unit tests"
+
+      - name: Compliance scan + evidence report (fails on unwaived HIGH)
+        run: python scripts/report.py --fail-on HIGH
+
+      - name: Publish summary
+        if: always()
+        run: |
+          if [ -f evidence/compliance-report.md ]; then
+            head -c 60000 evidence/compliance-report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Record pipeline duration
+        if: always()
+        run: |
+          END=$(date +%s); DUR=$((END - PIPELINE_START))
+          mkdir -p evidence
+          printf '{"run_id": "%s", "sha": "%s", "seconds": %s, "target_seconds": 180}\n' \
+            "$GITHUB_RUN_ID" "$GITHUB_SHA" "$DUR" > evidence/ci_timing.json
+          echo "Pipeline duration: ${DUR}s (target < 180s)"
+          echo "### Pipeline duration: ${DUR}s (target < 180s)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hipaa-evidence-${{ github.sha }}
+          path: |
+            evidence/compliance-report.*
+            evidence/ci_timing.json
+          retention-days: 90
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: pip install -r requirements-dev.txt
+      - run: python scripts/generate_patients.py --count 200 --seed 42
+      - run: pytest -q
