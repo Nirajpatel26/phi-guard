@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PHI Guard Demo</title>
+<style>
+  :root { --bg:#f6f6f3; --panel:#ffffff; --ink:#1b1f23; --muted:#5d6872; --line:#e1e3e6; --accent:#0f5f8c; --accent-bg:#e6f1f8;
+          --fail:#b42318; --fail-bg:#fdecea; --pass:#1a7f37; --pass-bg:#e7f5ea; --warn:#8a5a00; --warn-bg:#fff4dc; --code-bg:#f2f3f5; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131619; --panel:#1b1f23; --ink:#e6e8ea; --muted:#9aa4ad; --line:#2c3238; --accent:#7cc4ee; --accent-bg:#14303f;
+            --fail:#ff8a80; --fail-bg:#3a1c1a; --pass:#7ee2a0; --pass-bg:#173222; --warn:#ffd27a; --warn-bg:#3a2e12; --code-bg:#22272c; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.55 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:1120px; margin:0 auto; padding:28px 16px 64px; }
+  h1 { font-size:24px; margin:0; letter-spacing:-.01em; }
+  h2 { font-size:17px; margin:36px 0 6px; }
+  p { margin:6px 0; }
+  .muted { color:var(--muted); }
+  .note { background:var(--accent-bg); color:var(--ink); border-radius:10px; padding:12px 14px; margin:16px 0; }
+  .note.warn { background:var(--warn-bg); }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin:18px 0 6px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .card .k { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .card .v { font-size:26px; font-weight:650; margin-top:2px; }
+  .card .s { font-size:12px; color:var(--muted); }
+  .wrap { overflow-x:auto; background:var(--panel); border:1px solid var(--line); border-radius:12px; margin-top:10px; }
+  table { border-collapse:collapse; width:100%; min-width:720px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:12px; color:var(--muted); font-weight:600; }
+  tr:last-child td { border-bottom:none; }
+  code, pre { font:12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  td code { background:var(--code-bg); padding:1px 5px; border-radius:5px; word-break:break-word; }
+  pre { background:var(--code-bg); padding:10px 12px; border-radius:8px; overflow-x:auto; margin:8px 0 0; }
+  .pill { display:inline-block; padding:1px 8px; border-radius:999px; font-size:12px; font-weight:600; white-space:nowrap; }
+  .ok { color:var(--pass); background:var(--pass-bg); } .bad { color:var(--fail); background:var(--fail-bg); } .neutral { color:var(--warn); background:var(--warn-bg); }
+  .tag { display:inline-block; font-size:11px; padding:0 6px; margin:1px 2px 1px 0; border-radius:5px; background:var(--accent-bg); color:var(--accent); }
+  .bar { height:8px; background:var(--line); border-radius:99px; overflow:hidden; min-width:120px; }
+  .bar span { display:block; height:100%; background:var(--accent); }
+  .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; }
+  .tri { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .tri h3 { font-size:14px; margin:0 0 4px; }
+  footer { margin-top:40px; font-size:12px; color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>PHI Guard — offline demo run</h1>
+  <div class="muted">2026-11-12T17:57:31+00:00 UTC · Python 3.13.18 · detection engine <code>lite</code> · 0.24s · 200 synthetic patients</div>
+
+  <div class="note">This run used only Python: the services' logging code, the PHI scanner, the 50-leak scoring, the control catalogue,
+    the CI gate logic and the triage assistant. The Kubernetes cluster, Fluent Bit, Falco and the real Terraform + Conftest + Checkov
+    scan run with <code>make demo</code>.</div>
+  <div class="note warn"><strong>Lite engine:</strong> regex recognizers only, no NER model. Presidio + spaCy results come from
+    <code>make demo</code> (in-cluster scanner) or from installing <code>detector/presidio/requirements.txt</code> locally.</div>
+
+  <div class="cards">
+    <div class="card"><div class="k">HIPAA controls</div><div class="v">34/34</div><div class="s">implemented · goal 25+</div></div>
+    <div class="card"><div class="k">Log leaks caught</div><div class="v">36/40</div><div class="s">seeded, labelled</div></div>
+    <div class="card"><div class="k">Decoys flagged</div><div class="v">0/30</div><div class="s">false positives</div></div>
+    <div class="card"><div class="k">Precision · recall</div><div class="v">1.00 · 0.90</div><div class="s">over the 40 log leaks</div></div>
+    <div class="card"><div class="k">LEAK_MODE off → on</div><div class="v">0 → 30</div><div class="s">lines flagged of 30</div></div>
+  </div>
+
+  <h2>1 · Service logs with LEAK_MODE off vs on</h2>
+  <p class="muted">The same call sites in patient-api, claims-api and eligibility-api. Off logs a salted hash; on logs PHI in rotating formats.</p>
+  <div class="wrap"><table>
+    <thead><tr><th>Mode</th><th>Service</th><th>Log line (synthetic)</th><th>After masking</th><th>Detected</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill ok">off</span></td><td>patient-api</td><td><code>patient_read rid=req0000 patient_ref=697544618441</code></td><td><code>patient_read rid=req0000 patient_ref=697544618441</code></td>
+          <td><span class="muted">nothing</span></td></tr>
+      <tr><td><span class="pill ok">off</span></td><td>claims-api</td><td><code>claim_submitted rid=req0001 patient_ref=72e3f1933558</code></td><td><code>claim_submitted rid=req0001 patient_ref=72e3f1933558</code></td>
+          <td><span class="muted">nothing</span></td></tr>
+      <tr><td><span class="pill ok">off</span></td><td>eligibility-api</td><td><code>eligibility_check rid=req0002 patient_ref=377ce6551a98</code></td><td><code>eligibility_check rid=req0002 patient_ref=377ce6551a98</code></td>
+          <td><span class="muted">nothing</span></td></tr>
+      <tr><td><span class="pill bad">on</span></td><td>patient-api</td><td><code>patient_read rid=req0000 patient name=Carlos Lewis dob=1968-08-11</code></td><td><code>patient_read rid=req0000 patient name=&lt;PERSON&gt; dob=&lt;DATE_TIME&gt;</code></td>
+          <td><span class="tag">DATE_TIME</span><span class="tag">PERSON</span></td></tr>
+      <tr><td><span class="pill bad">on</span></td><td>claims-api</td><td><code>{&#34;event&#34;: &#34;claim_submitted&#34;, &#34;rid&#34;: &#34;req0001&#34;, &#34;patient&#34;: {&#34;name&#34;: &#34;Steven Davis&#34;, &#34;ssn&#34;: &#34;940-74-7034&#34;, &#34;mrn&#34;: &#34;MRN-4860617&#34;}}</code></td><td><code>{&#34;event&#34;: &#34;claim_submitted&#34;, &#34;rid&#34;: &#34;req0001&#34;, &#34;patient&#34;: {&#34;name&#34;: &#34;&lt;PERSON&gt;&#34;, &#34;ssn&#34;: &#34;&lt;US_SSN&gt;&#34;, &#34;mrn&#34;: &#34;&lt;MEDICAL_RECORD_NUMBER&gt;&#34;}}</code></td>
+          <td><span class="tag">MEDICAL_RECORD_NUMBER</span><span class="tag">PERSON</span><span class="tag">US_SSN</span></td></tr>
+      <tr><td><span class="pill bad">on</span></td><td>eligibility-api</td><td><code>eligibility_check rid=req0002 mrn=MRN-9036805 member_id=MNC510704185 pcp_npi=1341316473</code></td><td><code>eligibility_check rid=req0002 mrn=&lt;MEDICAL_RECORD_NUMBER&gt; member_id=&lt;HEALTH_PLAN_ID&gt; pcp_npi=&lt;US_NPI&gt;</code></td>
+          <td><span class="tag">HEALTH_PLAN_ID</span><span class="tag">MEDICAL_RECORD_NUMBER</span><span class="tag">US_NPI</span></td></tr>
+      <tr><td><span class="pill bad">on</span></td><td>patient-api</td><td><code>patient_read rid=req0003 GET /patients/search?name=Michael+Williams&amp;dob=1991-03-24</code></td><td><code>patient_read rid=req0003 GET /patients/search?name=&lt;PERSON&gt;&amp;dob=&lt;DATE_TIME&gt;</code></td>
+          <td><span class="tag">DATE_TIME</span><span class="tag">PERSON</span></td></tr>
+      <tr><td><span class="pill bad">on</span></td><td>claims-api</td><td><code>claim_submitted rid=req0004 ERROR KeyError(&#39;plan&#39;) while processing record {&#39;mrn&#39;: &#39;MRN-1675419&#39;, &#39;name&#39;: &#39;Anthony Taylor&#39;, &#39;ssn&#39;: &#39;985-15-9241&#39;}</code></td><td><code>claim_submitted rid=req0004 ERROR KeyError(&#39;plan&#39;) while processing record {&#39;mrn&#39;: &#39;&lt;MEDICAL_RECORD_NUMBER&gt;&#39;, &#39;name&#39;: &#39;&lt;PERSON&gt;&#39;, &#39;ssn&#39;: &#39;&lt;US_SSN&gt;&#39;}</code></td>
+          <td><span class="tag">MEDICAL_RECORD_NUMBER</span><span class="tag">PERSON</span><span class="tag">US_SSN</span></td></tr>
+      <tr><td><span class="pill bad">on</span></td><td>eligibility-api</td><td><code>eligibility_check rid=req0005 verifying identity ssn=938767026 date of birth 11/11/1945</code></td><td><code>eligibility_check rid=req0005 verifying identity ssn=&lt;US_SSN&gt; date of birth &lt;DATE_TIME&gt;</code></td>
+          <td><span class="tag">DATE_TIME</span><span class="tag">US_SSN</span></td></tr>
+      <tr><td><span class="pill bad">on</span></td><td>patient-api</td><td><code>patient_read rid=req0006 contact on file phone=(508) 555-0112 email=andrew.brown37@example.com</code></td><td><code>patient_read rid=req0006 contact on file phone=&lt;PHONE_NUMBER&gt; email=&lt;EMAIL_ADDRESS&gt;</code></td>
+          <td><span class="tag">EMAIL_ADDRESS</span><span class="tag">PHONE_NUMBER</span></td></tr>
+      <tr><td><span class="pill bad">on</span></td><td>claims-api</td><td><code>claim_submitted rid=req0007 subscriber BCN848933239 born Nov 12, 1961 plan=&#39;Bay Coast Network HMO&#39;</code></td><td><code>claim_submitted rid=req0007 subscriber &lt;HEALTH_PLAN_ID&gt; born &lt;DATE_TIME&gt; plan=&#39;Bay Coast Network HMO&#39;</code></td>
+          <td><span class="tag">DATE_TIME</span><span class="tag">HEALTH_PLAN_ID</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>2 · 50 labelled leaks: detection score</h2>
+  <p class="muted">40 log leaks and 30 decoys scored here; the 10 runtime events (egress, shell spawn, secret read) need Falco in the cluster and are not evaluated in this run.
+    Missed: <code>L013</code> <code>L014</code> <code>L027</code> <code>L028</code> </p>
+  <div class="grid2">
+    <div class="wrap"><table style="min-width:0">
+      <thead><tr><th>Entity</th><th>Recall</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>DATE_TIME</td><td>100%</td><td><div class="bar"><span style="width:100.0%"></span></div></td></tr>
+        <tr><td>EMAIL_ADDRESS</td><td>100%</td><td><div class="bar"><span style="width:100.0%"></span></div></td></tr>
+        <tr><td>HEALTH_PLAN_ID</td><td>75%</td><td><div class="bar"><span style="width:75.0%"></span></div></td></tr>
+        <tr><td>MEDICAL_RECORD_NUMBER</td><td>100%</td><td><div class="bar"><span style="width:100.0%"></span></div></td></tr>
+        <tr><td>PERSON</td><td>100%</td><td><div class="bar"><span style="width:100.0%"></span></div></td></tr>
+        <tr><td>PHONE_NUMBER</td><td>100%</td><td><div class="bar"><span style="width:100.0%"></span></div></td></tr>
+        <tr><td>US_NPI</td><td>60%</td><td><div class="bar"><span style="width:60.0%"></span></div></td></tr>
+        <tr><td>US_SSN</td><td>100%</td><td><div class="bar"><span style="width:100.0%"></span></div></td></tr>
+      </tbody>
+    </table></div>
+    <div class="wrap"><table style="min-width:0">
+      <thead><tr><th>Decoy (should be ignored)</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /healthz 200 0.8ms rid=seed-D001</code></td><td><span class="pill ok">ignored</span></td></tr>
+        <tr><td><code>GET /readyz 200 1.1ms rid=seed-D002</code></td><td><span class="pill ok">ignored</span></td></tr>
+        <tr><td><code>order ORD123456789 shipped to warehouse 7 rid=seed-D003</code></td><td><span class="pill ok">ignored</span></td></tr>
+        <tr><td><code>invoice INV987654321 settled rid=seed-D004</code></td><td><span class="pill ok">ignored</span></td></tr>
+        <tr><td><code>batch BAT555444333 queued for retry rid=seed-D005</code></td><td><span class="pill ok">ignored</span></td></tr>
+        <tr><td><code>processed 1234567 records in 4.2s rid=seed-D006</code></td><td><span class="pill ok">ignored</span></td></tr>
+        <tr><td><code>cache hit ratio 0.93 over 7654321 lookups rid=seed-D007</code></td><td><span class="pill ok">ignored</span></td></tr>
+        <tr><td><code>epoch 1731400000 checkpoint written rid=seed-D008</code></td><td><span class="pill ok">ignored</span></td></tr>
+        <tr><td><code>epoch 2731400017 compaction finished rid=seed-D009</code></td><td><span class="pill ok">ignored</span></td></tr>
+        <tr><td><code>build 2026-11-01 deployed to staging rid=seed-D010</code></td><td><span class="pill ok">ignored</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="wrap"><table>
+    <thead><tr><th>Leak format</th><th>Seeded line (synthetic)</th><th>After masking</th><th>Expected</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>name as key=value</td><td><code>patient lookup ok name=Wei Tanaka rid=seed-L001</code></td><td><code>patient lookup ok name=&lt;PERSON&gt; rid=seed-L001</code></td>
+          <td><span class="tag">PERSON</span></td>
+          <td><span class="pill ok">caught</span></td></tr>
+      <tr><td>SSN inside JSON</td><td><code>{&#34;event&#34;: &#34;claim_submitted&#34;, &#34;ssn&#34;: &#34;960-13-7179&#34;} rid=seed-L002</code></td><td><code>{&#34;event&#34;: &#34;claim_submitted&#34;, &#34;ssn&#34;: &#34;&lt;US_SSN&gt;&#34;} rid=seed-L002</code></td>
+          <td><span class="tag">US_SSN</span></td>
+          <td><span class="pill ok">caught</span></td></tr>
+      <tr><td>DOB + MRN</td><td><code>DOB: 01/12/1981 confirmed for MRN-9528410 rid=seed-L003</code></td><td><code>DOB: &lt;DATE_TIME&gt; confirmed for &lt;MEDICAL_RECORD_NUMBER&gt; rid=seed-L003</code></td>
+          <td><span class="tag">DATE_TIME</span><span class="tag">MEDICAL_RECORD_NUMBER</span></td>
+          <td><span class="pill ok">caught</span></td></tr>
+      <tr><td>member_id as key=value</td><td><code>eligibility check member_id=HPX373821508 status=active rid=seed-L004</code></td><td><code>eligibility check member_id=&lt;HEALTH_PLAN_ID&gt; status=active rid=seed-L004</code></td>
+          <td><span class="tag">HEALTH_PLAN_ID</span></td>
+          <td><span class="pill ok">caught</span></td></tr>
+      <tr><td>provider NPI with context</td><td><code>rendering provider NPI 1043321813 attached to claim rid=seed-L005</code></td><td><code>rendering provider NPI &lt;US_NPI&gt; attached to claim rid=seed-L005</code></td>
+          <td><span class="tag">US_NPI</span></td>
+          <td><span class="pill ok">caught</span></td></tr>
+      <tr><td>phone as key=value</td><td><code>callback requested phone=(860) 555-0172 rid=seed-L006</code></td><td><code>callback requested phone=&lt;PHONE_NUMBER&gt; rid=seed-L006</code></td>
+          <td><span class="tag">PHONE_NUMBER</span></td>
+          <td><span class="pill ok">caught</span></td></tr>
+      <tr><td>email address</td><td><code>statement emailed to lisa.scott87@example.com rid=seed-L007</code></td><td><code>statement emailed to &lt;EMAIL_ADDRESS&gt; rid=seed-L007</code></td>
+          <td><span class="tag">EMAIL_ADDRESS</span></td>
+          <td><span class="pill ok">caught</span></td></tr>
+      <tr><td>name + DOB in URL query</td><td><code>GET /patients/search?name=Nancy+Flores&amp;dob=1963-04-19 200 rid=seed-L008</code></td><td><code>GET /patients/search?name=&lt;PERSON&gt;&amp;dob=&lt;DATE_TIME&gt; 200 rid=seed-L008</code></td>
+          <td><span class="tag">PERSON</span><span class="tag">DATE_TIME</span></td>
+          <td><span class="pill ok">caught</span></td></tr>
+      <tr><td>MRN + name in exception dump</td><td><code>ERROR KeyError(&#39;plan&#39;) record={&#39;mrn&#39;: &#39;MRN-5510085&#39;, &#39;name&#39;: &#39;Betty Thomas&#39;} rid=seed-L009</code></td><td><code>ERROR KeyError(&#39;plan&#39;) record={&#39;mrn&#39;: &#39;&lt;MEDICAL_RECORD_NUMBER&gt;&#39;, &#39;name&#39;: &#39;&lt;PERSON&gt;&#39;} rid=seed-L009</code></td>
+          <td><span class="tag">MEDICAL_RECORD_NUMBER</span><span class="tag">PERSON</span></td>
+          <td><span class="pill ok">caught</span></td></tr>
+      <tr><td>compact SSN (no dashes)</td><td><code>identity verified ssn=953431857 rid=seed-L010</code></td><td><code>identity verified ssn=&lt;US_SSN&gt; rid=seed-L010</code></td>
+          <td><span class="tag">US_SSN</span></td>
+          <td><span class="pill ok">caught</span></td></tr>
+      <tr><td>member ID + long-form DOB</td><td><code>subscriber MNC605672755 born Jun 27, 2005 rid=seed-L011</code></td><td><code>subscriber &lt;HEALTH_PLAN_ID&gt; born &lt;DATE_TIME&gt; rid=seed-L011</code></td>
+          <td><span class="tag">HEALTH_PLAN_ID</span><span class="tag">DATE_TIME</span></td>
+          <td><span class="pill ok">caught</span></td></tr>
+      <tr><td>patient name + bare MRN</td><td><code>Patient Nancy Flores (MRN 6777340) admitted to ward 4B rid=seed-L012</code></td><td><code>Patient &lt;PERSON&gt; (&lt;MEDICAL_RECORD_NUMBER&gt;) admitted to ward 4B rid=seed-L012</code></td>
+          <td><span class="tag">PERSON</span><span class="tag">MEDICAL_RECORD_NUMBER</span></td>
+          <td><span class="pill ok">caught</span></td></tr>
+      <tr><td>member ID, no context words (hard)</td><td><code>cache key GSH917624738 warmed rid=seed-L013</code></td><td><code>cache key GSH917624738 warmed rid=seed-L013</code></td>
+          <td><span class="tag">HEALTH_PLAN_ID</span></td>
+          <td><span class="pill bad">missed</span></td></tr>
+      <tr><td>NPI, no context words (hard)</td><td><code>forwarding to 1559407816 queue rid=seed-L014</code></td><td><code>forwarding to 1559407816 queue rid=seed-L014</code></td>
+          <td><span class="tag">US_NPI</span></td>
+          <td><span class="pill bad">missed</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>3 · HIPAA control catalogue</h2>
+  <p class="muted">34 of 34 controls have an implementing check (20 Rego, 14 Checkov). Counted from policies/mapping.yaml and the policy files.</p>
+  <div class="wrap"><table>
+    <thead><tr><th>45 CFR citation</th><th>Controls</th></tr></thead>
+    <tbody>
+      <tr><td>45 CFR §164.312(a)(1)</td><td>11</td></tr>
+      <tr><td>45 CFR §164.312(a)(2)(iv)</td><td>4</td></tr>
+      <tr><td>45 CFR §164.312(b)</td><td>5</td></tr>
+      <tr><td>45 CFR §164.312(c)(1)</td><td>6</td></tr>
+      <tr><td>45 CFR §164.312(d)</td><td>3</td></tr>
+      <tr><td>45 CFR §164.312(e)(1)</td><td>2</td></tr>
+      <tr><td>45 CFR §164.312(e)(2)(ii)</td><td>3</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>4 · CI gate on sample findings</h2>
+  <p class="muted">Sample tool output from tests/fixtures (the real scan needs Terraform, Conftest and Checkov).</p>
+  <div class="cards">
+    <div class="card"><div class="k">Strict (no waivers)</div><div class="v"><span class="pill bad">FAIL</span></div><div class="s">7 unwaived HIGH findings</div></div>
+    <div class="card"><div class="k">With waivers</div><div class="v"><span class="pill ok">PASS</span></div><div class="s">10 documented waivers</div></div>
+  </div>
+
+  <h2>5 · LLM triage examples</h2>
+  <p class="muted">Provider: <code>mock</code>. Every answer is schema-validated and cross-checked against mapping.yaml.</p>
+  <div class="grid2">
+    <div class="tri">
+      <h3>PHI-AC-01 · <code>aws_s3_bucket.legacy_exports</code></h3>
+      <div class="muted">45 CFR §164.312(a)(1) · HIGH · infra/terraform/aws/s3.tf:166 · source mock</div>
+      <p>aws_s3_bucket.legacy_exports fails PHI-AC-01 (S3 buckets block all public access). A bucket without a full public access block can be exposed by a single ACL or policy change, making every stored record readable from the internet. This maps to 45 CFR §164.312(a)(1) (Access control). Detected by conftest check PHI-AC-01: no aws_s3_bucket_public_access_block with all four flags set to true.</p>
+      <pre>--- a/infra/terraform/aws/s3.tf
++++ b/infra/terraform/aws/s3.tf
+@@ aws_s3_bucket.legacy_exports (line 166) @@
++resource &#34;aws_s3_bucket_public_access_block&#34; &#34;legacy_exports&#34; {
++  bucket                  = aws_s3_bucket.legacy_exports.id
++  block_public_acls       = true
++  block_public_policy     = true
++  ignore_public_acls      = true
++  restrict_public_buckets = true
++}</pre>
+    </div>
+    <div class="tri">
+      <h3>PHI-ENC-02 · <code>aws_db_instance.legacy_reporting</code></h3>
+      <div class="muted">45 CFR §164.312(a)(2)(iv) · HIGH · /rds.tf:63 · source mock</div>
+      <p>aws_db_instance.legacy_reporting fails PHI-ENC-02 (RDS storage is encrypted at rest). Unencrypted database storage and snapshots expose PHI if volumes or snapshots are copied or shared. This maps to 45 CFR §164.312(a)(2)(iv) (Encryption and decryption (addressable)). Detected by checkov check CKV_AWS_16: Ensure all data stored in the RDS is securely encrypted at rest.</p>
+      <pre>--- a//rds.tf
++++ b//rds.tf
+@@ aws_db_instance.legacy_reporting (line 63) @@
++storage_encrypted = true
++kms_key_id        = aws_kms_key.phi.arn</pre>
+    </div>
+    <div class="tri">
+      <h3>PHI-K8S-01 · <code>Deployment/phi-reporting/report-exporter</code></h3>
+      <div class="muted">45 CFR §164.312(a)(1) · HIGH · /legacy/reporting-stack.yaml:11 · source mock</div>
+      <p>Deployment/phi-reporting/report-exporter fails PHI-K8S-01 (Containers are not privileged). A privileged container has full access to the node and every other workload&#39;s data, including PHI volumes. This maps to 45 CFR §164.312(a)(1) (Access control). Detected by checkov check CKV_K8S_16: Container should not be privileged.</p>
+      <pre>--- a//legacy/reporting-stack.yaml
++++ b//legacy/reporting-stack.yaml
+@@ Deployment/phi-reporting/report-exporter (line 11) @@
++securityContext:
++  privileged: false</pre>
+    </div>
+  </div>
+
+  <footer>Synthetic data only. Academic project, not a certified compliance tool. Full run: <code>make demo</code> · this page: <code>make demo-offline</code></footer>
+</main>
+</body>
+</html>

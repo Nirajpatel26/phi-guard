@@ -1,0 +1,288 @@
+{
+  "provider": "mock",
+  "model": "mock-template-v1",
+  "commit": "uncommitted",
+  "count": 10,
+  "items": [
+    {
+      "finding": {
+        "finding_id": "F-f4d9ac62",
+        "control_id": "PHI-AC-01",
+        "resource": "aws_s3_bucket.legacy_exports",
+        "file": "infra/terraform/aws/s3.tf",
+        "line": 166,
+        "severity": "HIGH",
+        "status": "WAIVED",
+        "message": "no aws_s3_bucket_public_access_block with all four flags set to true"
+      },
+      "triage": {
+        "finding_id": "F-f4d9ac62",
+        "control_id": "PHI-AC-01",
+        "hipaa_citation": "45 CFR \u00a7164.312(a)(1)",
+        "severity": "HIGH",
+        "risk_summary": "aws_s3_bucket.legacy_exports fails PHI-AC-01 (S3 buckets block all public access). A bucket without a full public access block can be exposed by a single ACL or policy change, making every stored record readable from the internet. This maps to 45 CFR \u00a7164.312(a)(1) (Access control). Detected by conftest check PHI-AC-01: no aws_s3_bucket_public_access_block with all four flags set to true.",
+        "suggested_fix": {
+          "format": "terraform",
+          "diff": "--- a/infra/terraform/aws/s3.tf\n+++ b/infra/terraform/aws/s3.tf\n@@ aws_s3_bucket.legacy_exports (line 166) @@\n+resource \"aws_s3_bucket_public_access_block\" \"legacy_exports\" {\n+  bucket                  = aws_s3_bucket.legacy_exports.id\n+  block_public_acls       = true\n+  block_public_policy     = true\n+  ignore_public_acls      = true\n+  restrict_public_buckets = true\n+}"
+        },
+        "confidence": "medium",
+        "source": "mock",
+        "model": "mock-template-v1",
+        "attempts": 1,
+        "seconds": 0.0
+      }
+    },
+    {
+      "finding": {
+        "finding_id": "F-96386060",
+        "control_id": "PHI-ENC-01",
+        "resource": "aws_s3_bucket.legacy_exports",
+        "file": "infra/terraform/aws/s3.tf",
+        "line": 166,
+        "severity": "HIGH",
+        "status": "WAIVED",
+        "message": "bucket is not encrypted with SSE-KMS (aws:kms) using a customer-managed key"
+      },
+      "triage": {
+        "finding_id": "F-96386060",
+        "control_id": "PHI-ENC-01",
+        "hipaa_citation": "45 CFR \u00a7164.312(a)(2)(iv)",
+        "severity": "HIGH",
+        "risk_summary": "aws_s3_bucket.legacy_exports fails PHI-ENC-01 (PHI and audit S3 buckets use SSE-KMS with a customer-managed key). Without SSE-KMS, decryption is not separately access-controlled or auditable through KMS key policy and CloudTrail. This maps to 45 CFR \u00a7164.312(a)(2)(iv) (Encryption and decryption (addressable)). Detected by conftest check PHI-ENC-01: bucket is not encrypted with SSE-KMS (aws:kms) using a customer-managed key.",
+        "suggested_fix": {
+          "format": "terraform",
+          "diff": "--- a/infra/terraform/aws/s3.tf\n+++ b/infra/terraform/aws/s3.tf\n@@ aws_s3_bucket.legacy_exports (line 166) @@\n+resource \"aws_s3_bucket_server_side_encryption_configuration\" \"legacy_exports\" {\n+  bucket = aws_s3_bucket.legacy_exports.id\n+  rule {\n+    apply_server_side_encryption_by_default {\n+      sse_algorithm     = \"aws:kms\"\n+      kms_master_key_id = aws_kms_key.phi.arn\n+    }\n+  }\n+}"
+        },
+        "confidence": "medium",
+        "source": "mock",
+        "model": "mock-template-v1",
+        "attempts": 1,
+        "seconds": 0.0
+      }
+    },
+    {
+      "finding": {
+        "finding_id": "F-eafcf95e",
+        "control_id": "PHI-ENC-02",
+        "resource": "aws_db_instance.legacy_reporting",
+        "file": "/rds.tf",
+        "line": 63,
+        "severity": "HIGH",
+        "status": "WAIVED",
+        "message": "Ensure all data stored in the RDS is securely encrypted at rest"
+      },
+      "triage": {
+        "finding_id": "F-eafcf95e",
+        "control_id": "PHI-ENC-02",
+        "hipaa_citation": "45 CFR \u00a7164.312(a)(2)(iv)",
+        "severity": "HIGH",
+        "risk_summary": "aws_db_instance.legacy_reporting fails PHI-ENC-02 (RDS storage is encrypted at rest). Unencrypted database storage and snapshots expose PHI if volumes or snapshots are copied or shared. This maps to 45 CFR \u00a7164.312(a)(2)(iv) (Encryption and decryption (addressable)). Detected by checkov check CKV_AWS_16: Ensure all data stored in the RDS is securely encrypted at rest.",
+        "suggested_fix": {
+          "format": "terraform",
+          "diff": "--- a//rds.tf\n+++ b//rds.tf\n@@ aws_db_instance.legacy_reporting (line 63) @@\n+storage_encrypted = true\n+kms_key_id        = aws_kms_key.phi.arn"
+        },
+        "confidence": "medium",
+        "source": "mock",
+        "model": "mock-template-v1",
+        "attempts": 1,
+        "seconds": 0.0
+      }
+    },
+    {
+      "finding": {
+        "finding_id": "F-b0dbba67",
+        "control_id": "PHI-K8S-01",
+        "resource": "Deployment/phi-reporting/report-exporter",
+        "file": "/legacy/reporting-stack.yaml",
+        "line": 11,
+        "severity": "HIGH",
+        "status": "WAIVED",
+        "message": "Container should not be privileged"
+      },
+      "triage": {
+        "finding_id": "F-b0dbba67",
+        "control_id": "PHI-K8S-01",
+        "hipaa_citation": "45 CFR \u00a7164.312(a)(1)",
+        "severity": "HIGH",
+        "risk_summary": "Deployment/phi-reporting/report-exporter fails PHI-K8S-01 (Containers are not privileged). A privileged container has full access to the node and every other workload's data, including PHI volumes. This maps to 45 CFR \u00a7164.312(a)(1) (Access control). Detected by checkov check CKV_K8S_16: Container should not be privileged.",
+        "suggested_fix": {
+          "format": "yaml",
+          "diff": "--- a//legacy/reporting-stack.yaml\n+++ b//legacy/reporting-stack.yaml\n@@ Deployment/phi-reporting/report-exporter (line 11) @@\n+securityContext:\n+  privileged: false"
+        },
+        "confidence": "medium",
+        "source": "mock",
+        "model": "mock-template-v1",
+        "attempts": 1,
+        "seconds": 0.0
+      }
+    },
+    {
+      "finding": {
+        "finding_id": "F-a3fa21ef",
+        "control_id": "PHI-K8S-02",
+        "resource": "Deployment/phi-reporting/report-exporter",
+        "file": "infra/k8s/legacy/reporting-stack.yaml",
+        "line": 12,
+        "severity": "HIGH",
+        "status": "WAIVED",
+        "message": "container \"exporter\" does not enforce runAsNonRoot"
+      },
+      "triage": {
+        "finding_id": "F-a3fa21ef",
+        "control_id": "PHI-K8S-02",
+        "hipaa_citation": "45 CFR \u00a7164.312(a)(1)",
+        "severity": "HIGH",
+        "risk_summary": "Deployment/phi-reporting/report-exporter fails PHI-K8S-02 (Containers run as non-root). Root inside a container makes container escape and lateral movement to PHI workloads far easier. This maps to 45 CFR \u00a7164.312(a)(1) (Access control). Detected by conftest check PHI-K8S-02: container \"exporter\" does not enforce runAsNonRoot.",
+        "suggested_fix": {
+          "format": "yaml",
+          "diff": "--- a/infra/k8s/legacy/reporting-stack.yaml\n+++ b/infra/k8s/legacy/reporting-stack.yaml\n@@ Deployment/phi-reporting/report-exporter (line 12) @@\n+securityContext:\n+  runAsNonRoot: true\n+  runAsUser: 10001"
+        },
+        "confidence": "medium",
+        "source": "mock",
+        "model": "mock-template-v1",
+        "attempts": 1,
+        "seconds": 0.0
+      }
+    },
+    {
+      "finding": {
+        "finding_id": "F-01b95d72",
+        "control_id": "PHI-K8S-06",
+        "resource": "Deployment/phi-reporting/report-exporter",
+        "file": "infra/k8s/legacy/reporting-stack.yaml",
+        "line": 12,
+        "severity": "HIGH",
+        "status": "WAIVED",
+        "message": "container \"exporter\" sets DB_PASSWORD to a literal value; mount a Secret as a file instead"
+      },
+      "triage": {
+        "finding_id": "F-01b95d72",
+        "control_id": "PHI-K8S-06",
+        "hipaa_citation": "45 CFR \u00a7164.312(a)(1)",
+        "severity": "HIGH",
+        "risk_summary": "Deployment/phi-reporting/report-exporter fails PHI-K8S-06 (No hard-coded secrets in container environment variables). Literal credentials in manifests leak through git history, kubectl describe and CI logs, granting database access to PHI. This maps to 45 CFR \u00a7164.312(a)(1) (Access control). Detected by conftest check PHI-K8S-06: container \"exporter\" sets DB_PASSWORD to a literal value; mount a Secret as a file instead.",
+        "suggested_fix": {
+          "format": "yaml",
+          "diff": "--- a/infra/k8s/legacy/reporting-stack.yaml\n+++ b/infra/k8s/legacy/reporting-stack.yaml\n@@ Deployment/phi-reporting/report-exporter (line 12) @@\n+volumeMounts:\n+  - name: db-credentials\n+    mountPath: /etc/phi-secrets\n+    readOnly: true\n+# volumes: - name: db-credentials / secret: { secretName: phi-db-credentials }"
+        },
+        "confidence": "medium",
+        "source": "mock",
+        "model": "mock-template-v1",
+        "attempts": 1,
+        "seconds": 0.0
+      }
+    },
+    {
+      "finding": {
+        "finding_id": "F-adaa5138",
+        "control_id": "PHI-K8S-08",
+        "resource": "Ingress/phi-reporting/legacy-reports",
+        "file": "infra/k8s/legacy/reporting-stack.yaml",
+        "line": 78,
+        "severity": "HIGH",
+        "status": "WAIVED",
+        "message": "Ingress has no spec.tls; traffic is served over plain HTTP"
+      },
+      "triage": {
+        "finding_id": "F-adaa5138",
+        "control_id": "PHI-K8S-08",
+        "hipaa_citation": "45 CFR \u00a7164.312(e)(2)(ii)",
+        "severity": "HIGH",
+        "risk_summary": "Ingress/phi-reporting/legacy-reports fails PHI-K8S-08 (Ingresses terminate TLS). An Ingress without TLS serves PHI over plain HTTP between the client and the cluster edge. This maps to 45 CFR \u00a7164.312(e)(2)(ii) (Encryption (transmission, addressable)). Detected by conftest check PHI-K8S-08: Ingress has no spec.tls; traffic is served over plain HTTP.",
+        "suggested_fix": {
+          "format": "yaml",
+          "diff": "--- a/infra/k8s/legacy/reporting-stack.yaml\n+++ b/infra/k8s/legacy/reporting-stack.yaml\n@@ Ingress/phi-reporting/legacy-reports (line 78) @@\n+spec:\n+  tls:\n+    - hosts: [\"<host>\"]\n+      secretName: <host>-tls"
+        },
+        "confidence": "medium",
+        "source": "mock",
+        "model": "mock-template-v1",
+        "attempts": 1,
+        "seconds": 0.0
+      }
+    },
+    {
+      "finding": {
+        "finding_id": "F-2ac18cc2",
+        "control_id": "PHI-ENC-03",
+        "resource": "aws_kms_key.legacy",
+        "file": "/kms.tf",
+        "line": 16,
+        "severity": "MEDIUM",
+        "status": "WAIVED",
+        "message": "Ensure rotation for customer created CMKs is enabled"
+      },
+      "triage": {
+        "finding_id": "F-2ac18cc2",
+        "control_id": "PHI-ENC-03",
+        "hipaa_citation": "45 CFR \u00a7164.312(a)(2)(iv)",
+        "severity": "MEDIUM",
+        "risk_summary": "aws_kms_key.legacy fails PHI-ENC-03 (KMS customer-managed keys have rotation enabled). Keys that never rotate increase the impact window of a key compromise. This maps to 45 CFR \u00a7164.312(a)(2)(iv) (Encryption and decryption (addressable)). Detected by checkov check CKV_AWS_7: Ensure rotation for customer created CMKs is enabled.",
+        "suggested_fix": {
+          "format": "terraform",
+          "diff": "--- a//kms.tf\n+++ b//kms.tf\n@@ aws_kms_key.legacy (line 16) @@\n+enable_key_rotation = true"
+        },
+        "confidence": "medium",
+        "source": "mock",
+        "model": "mock-template-v1",
+        "attempts": 1,
+        "seconds": 0.0
+      }
+    },
+    {
+      "finding": {
+        "finding_id": "F-8fc82341",
+        "control_id": "PHI-INT-03",
+        "resource": "aws_db_instance.legacy_reporting",
+        "file": "/rds.tf",
+        "line": 63,
+        "severity": "MEDIUM",
+        "status": "WAIVED",
+        "message": "PHI Guard: RDS instance holding PHI has deletion protection enabled"
+      },
+      "triage": {
+        "finding_id": "F-8fc82341",
+        "control_id": "PHI-INT-03",
+        "hipaa_citation": "45 CFR \u00a7164.312(c)(1)",
+        "severity": "MEDIUM",
+        "risk_summary": "aws_db_instance.legacy_reporting fails PHI-INT-03 (RDS instances have deletion protection). A database holding PHI can be destroyed by a single API call or a mistaken terraform apply. This maps to 45 CFR \u00a7164.312(c)(1) (Integrity). Detected by checkov check CKV_PHI_AWS_1: PHI Guard: RDS instance holding PHI has deletion protection enabled.",
+        "suggested_fix": {
+          "format": "terraform",
+          "diff": "--- a//rds.tf\n+++ b//rds.tf\n@@ aws_db_instance.legacy_reporting (line 63) @@\n+deletion_protection = true"
+        },
+        "confidence": "medium",
+        "source": "mock",
+        "model": "mock-template-v1",
+        "attempts": 1,
+        "seconds": 0.0
+      }
+    },
+    {
+      "finding": {
+        "finding_id": "F-663584c4",
+        "control_id": "PHI-INT-04",
+        "resource": "aws_db_instance.legacy_reporting",
+        "file": "infra/terraform/aws/rds.tf",
+        "line": 61,
+        "severity": "MEDIUM",
+        "status": "WAIVED",
+        "message": "backup_retention_period is 1 days (minimum 7)"
+      },
+      "triage": {
+        "finding_id": "F-663584c4",
+        "control_id": "PHI-INT-04",
+        "hipaa_citation": "45 CFR \u00a7164.312(c)(1)",
+        "severity": "MEDIUM",
+        "risk_summary": "aws_db_instance.legacy_reporting fails PHI-INT-04 (RDS backups are retained for at least 7 days). Short retention limits the ability to restore PHI to a known-good state after corruption or ransomware. This maps to 45 CFR \u00a7164.312(c)(1) (Integrity). Detected by conftest check PHI-INT-04: backup_retention_period is 1 days (minimum 7).",
+        "suggested_fix": {
+          "format": "terraform",
+          "diff": "--- a/infra/terraform/aws/rds.tf\n+++ b/infra/terraform/aws/rds.tf\n@@ aws_db_instance.legacy_reporting (line 61) @@\n+backup_retention_period = 14"
+        },
+        "confidence": "medium",
+        "source": "mock",
+        "model": "mock-template-v1",
+        "attempts": 1,
+        "seconds": 0.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PHI Guard Evidence</title>
+<style>
+  :root { --bg:#f7f7f5; --panel:#fff; --ink:#1d2125; --muted:#5f6b76; --line:#e2e4e7;
+          --fail:#b42318; --fail-bg:#fdecea; --pass:#1a7f37; --pass-bg:#e7f5ea; --waive:#8a5a00; --waive-bg:#fff4dc; --ne:#5f6b76; --ne-bg:#eef0f2; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171a; --panel:#1c2024; --ink:#e7e9ea; --muted:#9aa4ad; --line:#2d3338;
+            --fail:#ff8a80; --fail-bg:#3a1c1a; --pass:#7ee2a0; --pass-bg:#173222; --waive:#ffd27a; --waive-bg:#3a2e12; --ne:#9aa4ad; --ne-bg:#262b30; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:1200px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { font-size:22px; margin:0 0 4px; } h2 { font-size:17px; margin:32px 0 8px; }
+  .muted { color:var(--muted); }
+  .banner { background:var(--waive-bg); color:var(--waive); padding:10px 14px; border-radius:8px; margin:12px 0; font-weight:600; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin:16px 0; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .card .v { font-size:22px; font-weight:650; } .card .k { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  .table-wrap { overflow-x:auto; background:var(--panel); border:1px solid var(--line); border-radius:10px; }
+  table { border-collapse:collapse; width:100%; min-width:760px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:12px; color:var(--muted); font-weight:600; background:var(--panel); position:sticky; top:0; }
+  tr:last-child td { border-bottom:none; }
+  code { font:12px ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .pill { display:inline-block; padding:1px 8px; border-radius:999px; font-size:12px; font-weight:600; }
+  .FAIL { color:var(--fail); background:var(--fail-bg); } .PASS { color:var(--pass); background:var(--pass-bg); }
+  .WAIVED { color:var(--waive); background:var(--waive-bg); } .NOT_EVALUATED { color:var(--ne); background:var(--ne-bg); }
+  .sev-HIGH { font-weight:700; }
+  .note { font-size:12px; color:var(--muted); margin-top:4px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>PHI Guard — HIPAA Technical Safeguards Evidence</h1>
+  <div class="muted">HIPAA Security Rule - 45 CFR §164.312 Technical Safeguards · commit <code>uncommitted</code> · 2026-11-12T16:25:33+00:00 UTC</div>
+<div class="banner">SAMPLE rendered from tests/fixtures (hand-written tool output), not a real scan. Run 'make report'.</div>
+  <div class="cards">
+    <div class="card"><div class="k">Controls evaluated</div><div class="v">24 / 34</div></div>
+    <div class="card"><div class="k">Pass</div><div class="v">37</div></div>
+    <div class="card"><div class="k">Fail (unwaived)</div><div class="v">0</div></div>
+    <div class="card"><div class="k">Waived</div><div class="v">10</div></div>
+    <div class="card"><div class="k">Unwaived HIGH</div><div class="v">0</div></div>
+  </div>
+  <div class="note">Tools: conftest_tf ran (loaded tests/fixtures/conftest_tf.json) · conftest_k8s ran (loaded tests/fixtures/conftest_k8s.json) · checkov ran (loaded tests/fixtures/checkov.json).
+    Waivers applied. Academic project on synthetic data — not a certified compliance assessment.</div>
+
+  <h2>Control status</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Control</th><th>Citation</th><th>Severity</th><th>Status</th><th>Title</th></tr></thead>
+    <tbody>
+      <tr><td><code>PHI-AC-01</code></td><td>45 CFR §164.312(a)(1)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill WAIVED">WAIVED</span></td><td>S3 buckets block all public access</td></tr>
+      <tr><td><code>PHI-AC-02</code></td><td>45 CFR §164.312(a)(1)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>RDS instances are not publicly accessible</td></tr>
+      <tr><td><code>PHI-AC-03</code></td><td>45 CFR §164.312(a)(1)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>IAM policies do not grant wildcard admin ("*" on "*")</td></tr>
+      <tr><td><code>PHI-AC-04</code></td><td>45 CFR §164.312(a)(1)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>Security groups do not expose database ports to 0.0.0.0/0</td></tr>
+      <tr><td><code>PHI-AC-05</code></td><td>45 CFR §164.312(a)(1)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>S3 bucket ACLs are not public</td></tr>
+      <tr><td><code>PHI-AC-06</code></td><td>45 CFR §164.312(a)(1)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>Subnets do not auto-assign public IPs</td></tr>
+      <tr><td><code>PHI-ENC-01</code></td><td>45 CFR §164.312(a)(2)(iv)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill WAIVED">WAIVED</span></td><td>PHI and audit S3 buckets use SSE-KMS with a customer-managed key</td></tr>
+      <tr><td><code>PHI-ENC-02</code></td><td>45 CFR §164.312(a)(2)(iv)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill WAIVED">WAIVED</span></td><td>RDS storage is encrypted at rest</td></tr>
+      <tr><td><code>PHI-ENC-03</code></td><td>45 CFR §164.312(a)(2)(iv)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill WAIVED">WAIVED</span></td><td>KMS customer-managed keys have rotation enabled</td></tr>
+      <tr><td><code>PHI-ENC-04</code></td><td>45 CFR §164.312(a)(2)(iv)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>CloudTrail logs are encrypted with a KMS CMK</td></tr>
+      <tr><td><code>PHI-AU-01</code></td><td>45 CFR §164.312(b)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>CloudTrail is enabled in all regions</td></tr>
+      <tr><td><code>PHI-AU-02</code></td><td>45 CFR §164.312(b)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill PASS">PASS</span></td><td>PHI buckets have server access logging enabled</td></tr>
+      <tr><td><code>PHI-AU-03</code></td><td>45 CFR §164.312(b)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>VPCs have flow logs enabled</td></tr>
+      <tr><td><code>PHI-AU-04</code></td><td>45 CFR §164.312(b)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill PASS">PASS</span></td><td>RDS instances export database logs to CloudWatch</td></tr>
+      <tr><td><code>PHI-INT-01</code></td><td>45 CFR §164.312(c)(1)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>CloudTrail log file validation is enabled</td></tr>
+      <tr><td><code>PHI-INT-02</code></td><td>45 CFR §164.312(c)(1)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill PASS">PASS</span></td><td>PHI buckets have versioning enabled</td></tr>
+      <tr><td><code>PHI-INT-03</code></td><td>45 CFR §164.312(c)(1)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill WAIVED">WAIVED</span></td><td>RDS instances have deletion protection</td></tr>
+      <tr><td><code>PHI-INT-04</code></td><td>45 CFR §164.312(c)(1)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill WAIVED">WAIVED</span></td><td>RDS backups are retained for at least 7 days</td></tr>
+      <tr><td><code>PHI-AUTH-01</code></td><td>45 CFR §164.312(d)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>RDS instances use IAM database authentication</td></tr>
+      <tr><td><code>PHI-AUTH-02</code></td><td>45 CFR §164.312(d)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>IAM account password policy enforces length and complexity</td></tr>
+      <tr><td><code>PHI-TX-01</code></td><td>45 CFR §164.312(e)(1)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill PASS">PASS</span></td><td>PHI and audit buckets deny non-TLS requests</td></tr>
+      <tr><td><code>PHI-TX-02</code></td><td>45 CFR §164.312(e)(2)(ii)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill PASS">PASS</span></td><td>RDS parameter group forces TLS (rds.force_ssl = 1)</td></tr>
+      <tr><td><code>PHI-TX-03</code></td><td>45 CFR §164.312(e)(2)(ii)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>Load balancer listeners use HTTPS with a TLS 1.2+ policy (HTTP only for redirects)</td></tr>
+      <tr><td><code>PHI-K8S-01</code></td><td>45 CFR §164.312(a)(1)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill WAIVED">WAIVED</span></td><td>Containers are not privileged</td></tr>
+      <tr><td><code>PHI-K8S-02</code></td><td>45 CFR §164.312(a)(1)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill WAIVED">WAIVED</span></td><td>Containers run as non-root</td></tr>
+      <tr><td><code>PHI-K8S-03</code></td><td>45 CFR §164.312(c)(1)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill PASS">PASS</span></td><td>Containers use a read-only root filesystem</td></tr>
+      <tr><td><code>PHI-K8S-04</code></td><td>45 CFR §164.312(a)(1)</td><td class="sev-LOW">LOW</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>Containers set CPU and memory limits</td></tr>
+      <tr><td><code>PHI-K8S-05</code></td><td>45 CFR §164.312(c)(1)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>Images use a pinned tag, never "latest"</td></tr>
+      <tr><td><code>PHI-K8S-06</code></td><td>45 CFR §164.312(a)(1)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill WAIVED">WAIVED</span></td><td>No hard-coded secrets in container environment variables</td></tr>
+      <tr><td><code>PHI-K8S-07</code></td><td>45 CFR §164.312(e)(1)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill PASS">PASS</span></td><td>PHI namespaces have a default-deny NetworkPolicy</td></tr>
+      <tr><td><code>PHI-K8S-08</code></td><td>45 CFR §164.312(e)(2)(ii)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill WAIVED">WAIVED</span></td><td>Ingresses terminate TLS</td></tr>
+      <tr><td><code>PHI-K8S-09</code></td><td>45 CFR §164.312(b)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>Workloads carry data-classification and audit logging labels</td></tr>
+      <tr><td><code>PHI-K8S-10</code></td><td>45 CFR §164.312(a)(1)</td><td class="sev-HIGH">HIGH</td>
+          <td><span class="pill NOT_EVALUATED">NOT EVALUATED</span></td><td>Containers disallow privilege escalation</td></tr>
+      <tr><td><code>PHI-K8S-11</code></td><td>45 CFR §164.312(d)</td><td class="sev-MEDIUM">MEDIUM</td>
+          <td><span class="pill PASS">PASS</span></td><td>Pods do not auto-mount service account tokens</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>45 CFR §164.312(a)(1) — Access control</h2>
+  <div class="muted">0 fail · 4 waived · 11 pass</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Status</th><th>Control</th><th>Sev</th><th>Resource</th><th>Location</th><th>Check</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="pill WAIVED">WAIVED</span></td>
+        <td><code>PHI-AC-01</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>aws_s3_bucket.legacy_exports</code></td>
+        <td><code>infra/terraform/aws/s3.tf:166</code></td>
+        <td>conftest<br><code>PHI-AC-01</code></td>
+        <td>no aws_s3_bucket_public_access_block with all four flags set to true<div class="note">Waived: Intentional non-compliant Terraform fixture used to demonstrate detection. · owner phi-guard-maintainer · expires 2027-06-30</div></td>
+      </tr>
+      <tr>
+        <td><span class="pill WAIVED">WAIVED</span></td>
+        <td><code>PHI-K8S-01</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Deployment/phi-reporting/report-exporter</code></td>
+        <td><code>/legacy/reporting-stack.yaml:11</code></td>
+        <td>checkov<br><code>CKV_K8S_16</code></td>
+        <td>Container should not be privileged<div class="note">Waived: infra/k8s/legacy is a scan-only fixture and is never deployed. · owner phi-guard-maintainer · expires 2027-06-30</div></td>
+      </tr>
+      <tr>
+        <td><span class="pill WAIVED">WAIVED</span></td>
+        <td><code>PHI-K8S-02</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Deployment/phi-reporting/report-exporter</code></td>
+        <td><code>infra/k8s/legacy/reporting-stack.yaml:12</code></td>
+        <td>conftest<br><code>PHI-K8S-02</code></td>
+        <td>container "exporter" does not enforce runAsNonRoot<div class="note">Waived: infra/k8s/legacy is a scan-only fixture and is never deployed. · owner phi-guard-maintainer · expires 2027-06-30</div></td>
+      </tr>
+      <tr>
+        <td><span class="pill WAIVED">WAIVED</span></td>
+        <td><code>PHI-K8S-06</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Deployment/phi-reporting/report-exporter</code></td>
+        <td><code>infra/k8s/legacy/reporting-stack.yaml:12</code></td>
+        <td>conftest<br><code>PHI-K8S-06</code></td>
+        <td>container "exporter" sets DB_PASSWORD to a literal value; mount a Secret as a file instead<div class="note">Waived: infra/k8s/legacy is a scan-only fixture and is never deployed. · owner phi-guard-maintainer · expires 2027-06-30</div></td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-AC-01</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>aws_s3_bucket.access_logs</code></td>
+        <td><code>infra/terraform/aws/s3.tf:64</code></td>
+        <td>conftest<br><code>PHI-AC-01</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-AC-01</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>aws_s3_bucket.phi_records</code></td>
+        <td><code>infra/terraform/aws/s3.tf:4</code></td>
+        <td>conftest<br><code>PHI-AC-01</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-01</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Deployment/phi/patient-api</code></td>
+        <td><code>/rendered/sample-ehr.yaml:60</code></td>
+        <td>checkov<br><code>CKV_K8S_16</code></td>
+        <td>Container should not be privileged</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-02</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>CronJob/phi-reporting/nightly-extract</code></td>
+        <td><code>infra/k8s/legacy/reporting-stack.yaml:44</code></td>
+        <td>conftest<br><code>PHI-K8S-02</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-02</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Deployment/phi/claims-api</code></td>
+        <td><code>infra/k8s/rendered/sample-ehr.yaml:163</code></td>
+        <td>conftest<br><code>PHI-K8S-02</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-02</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Deployment/phi/eligibility-api</code></td>
+        <td><code>infra/k8s/rendered/sample-ehr.yaml:258</code></td>
+        <td>conftest<br><code>PHI-K8S-02</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-02</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Deployment/phi/patient-api</code></td>
+        <td><code>infra/k8s/rendered/sample-ehr.yaml:68</code></td>
+        <td>conftest<br><code>PHI-K8S-02</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-06</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>CronJob/phi-reporting/nightly-extract</code></td>
+        <td><code>infra/k8s/legacy/reporting-stack.yaml:44</code></td>
+        <td>conftest<br><code>PHI-K8S-06</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-06</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Deployment/phi/claims-api</code></td>
+        <td><code>infra/k8s/rendered/sample-ehr.yaml:163</code></td>
+        <td>conftest<br><code>PHI-K8S-06</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-06</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Deployment/phi/eligibility-api</code></td>
+        <td><code>infra/k8s/rendered/sample-ehr.yaml:258</code></td>
+        <td>conftest<br><code>PHI-K8S-06</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-06</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Deployment/phi/patient-api</code></td>
+        <td><code>infra/k8s/rendered/sample-ehr.yaml:68</code></td>
+        <td>conftest<br><code>PHI-K8S-06</code></td>
+        <td>no violation</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <h2>45 CFR §164.312(a)(2)(iv) — Encryption and decryption (addressable)</h2>
+  <div class="muted">0 fail · 3 waived · 2 pass</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Status</th><th>Control</th><th>Sev</th><th>Resource</th><th>Location</th><th>Check</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="pill WAIVED">WAIVED</span></td>
+        <td><code>PHI-ENC-01</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>aws_s3_bucket.legacy_exports</code></td>
+        <td><code>infra/terraform/aws/s3.tf:166</code></td>
+        <td>conftest<br><code>PHI-ENC-01</code></td>
+        <td>bucket is not encrypted with SSE-KMS (aws:kms) using a customer-managed key<div class="note">Waived: Intentional non-compliant Terraform fixture used to demonstrate detection. · owner phi-guard-maintainer · expires 2027-06-30</div></td>
+      </tr>
+      <tr>
+        <td><span class="pill WAIVED">WAIVED</span></td>
+        <td><code>PHI-ENC-02</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>aws_db_instance.legacy_reporting</code></td>
+        <td><code>/rds.tf:63</code></td>
+        <td>checkov<br><code>CKV_AWS_16</code></td>
+        <td>Ensure all data stored in the RDS is securely encrypted at rest<div class="note">Waived: Intentional non-compliant Terraform fixture used to demonstrate detection. · owner phi-guard-maintainer · expires 2027-06-30</div></td>
+      </tr>
+      <tr>
+        <td><span class="pill WAIVED">WAIVED</span></td>
+        <td><code>PHI-ENC-03</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>aws_kms_key.legacy</code></td>
+        <td><code>/kms.tf:16</code></td>
+        <td>checkov<br><code>CKV_AWS_7</code></td>
+        <td>Ensure rotation for customer created CMKs is enabled<div class="note">Waived: Intentional non-compliant Terraform fixture used to demonstrate detection. · owner phi-guard-maintainer · expires 2027-06-30</div></td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-ENC-01</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>aws_s3_bucket.phi_records</code></td>
+        <td><code>infra/terraform/aws/s3.tf:4</code></td>
+        <td>conftest<br><code>PHI-ENC-01</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-ENC-02</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>aws_db_instance.phi_primary</code></td>
+        <td><code>/rds.tf:24</code></td>
+        <td>checkov<br><code>CKV_AWS_16</code></td>
+        <td>Ensure all data stored in the RDS is securely encrypted at rest</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <h2>45 CFR §164.312(b) — Audit controls</h2>
+  <div class="muted">0 fail · 0 waived · 4 pass</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Status</th><th>Control</th><th>Sev</th><th>Resource</th><th>Location</th><th>Check</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-AU-02</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>aws_s3_bucket.legacy_exports</code></td>
+        <td><code>infra/terraform/aws/s3.tf:166</code></td>
+        <td>conftest<br><code>PHI-AU-02</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-AU-02</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>aws_s3_bucket.phi_records</code></td>
+        <td><code>infra/terraform/aws/s3.tf:4</code></td>
+        <td>conftest<br><code>PHI-AU-02</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-AU-04</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>aws_db_instance.legacy_reporting</code></td>
+        <td><code>infra/terraform/aws/rds.tf:61</code></td>
+        <td>conftest<br><code>PHI-AU-04</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-AU-04</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>aws_db_instance.phi_primary</code></td>
+        <td><code>infra/terraform/aws/rds.tf:24</code></td>
+        <td>conftest<br><code>PHI-AU-04</code></td>
+        <td>no violation</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <h2>45 CFR §164.312(c)(1) — Integrity</h2>
+  <div class="muted">0 fail · 2 waived · 8 pass</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Status</th><th>Control</th><th>Sev</th><th>Resource</th><th>Location</th><th>Check</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="pill WAIVED">WAIVED</span></td>
+        <td><code>PHI-INT-03</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>aws_db_instance.legacy_reporting</code></td>
+        <td><code>/rds.tf:63</code></td>
+        <td>checkov<br><code>CKV_PHI_AWS_1</code></td>
+        <td>PHI Guard: RDS instance holding PHI has deletion protection enabled<div class="note">Waived: Intentional non-compliant Terraform fixture used to demonstrate detection. · owner phi-guard-maintainer · expires 2027-06-30</div></td>
+      </tr>
+      <tr>
+        <td><span class="pill WAIVED">WAIVED</span></td>
+        <td><code>PHI-INT-04</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>aws_db_instance.legacy_reporting</code></td>
+        <td><code>infra/terraform/aws/rds.tf:61</code></td>
+        <td>conftest<br><code>PHI-INT-04</code></td>
+        <td>backup_retention_period is 1 days (minimum 7)<div class="note">Waived: Intentional non-compliant Terraform fixture used to demonstrate detection. · owner phi-guard-maintainer · expires 2027-06-30</div></td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-INT-02</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>aws_s3_bucket.legacy_exports</code></td>
+        <td><code>infra/terraform/aws/s3.tf:166</code></td>
+        <td>conftest<br><code>PHI-INT-02</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-INT-02</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>aws_s3_bucket.phi_records</code></td>
+        <td><code>infra/terraform/aws/s3.tf:4</code></td>
+        <td>conftest<br><code>PHI-INT-02</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-INT-04</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>aws_db_instance.phi_primary</code></td>
+        <td><code>infra/terraform/aws/rds.tf:24</code></td>
+        <td>conftest<br><code>PHI-INT-04</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-03</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>CronJob/phi-reporting/nightly-extract</code></td>
+        <td><code>infra/k8s/legacy/reporting-stack.yaml:44</code></td>
+        <td>conftest<br><code>PHI-K8S-03</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-03</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>Deployment/phi-reporting/report-exporter</code></td>
+        <td><code>infra/k8s/legacy/reporting-stack.yaml:12</code></td>
+        <td>conftest<br><code>PHI-K8S-03</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-03</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>Deployment/phi/claims-api</code></td>
+        <td><code>infra/k8s/rendered/sample-ehr.yaml:163</code></td>
+        <td>conftest<br><code>PHI-K8S-03</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-03</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>Deployment/phi/eligibility-api</code></td>
+        <td><code>infra/k8s/rendered/sample-ehr.yaml:258</code></td>
+        <td>conftest<br><code>PHI-K8S-03</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-03</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>Deployment/phi/patient-api</code></td>
+        <td><code>infra/k8s/rendered/sample-ehr.yaml:68</code></td>
+        <td>conftest<br><code>PHI-K8S-03</code></td>
+        <td>no violation</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <h2>45 CFR §164.312(d) — Person or entity authentication</h2>
+  <div class="muted">0 fail · 0 waived · 5 pass</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Status</th><th>Control</th><th>Sev</th><th>Resource</th><th>Location</th><th>Check</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-11</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>CronJob/phi-reporting/nightly-extract</code></td>
+        <td><code>infra/k8s/legacy/reporting-stack.yaml:44</code></td>
+        <td>conftest<br><code>PHI-K8S-11</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-11</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>Deployment/phi-reporting/report-exporter</code></td>
+        <td><code>infra/k8s/legacy/reporting-stack.yaml:12</code></td>
+        <td>conftest<br><code>PHI-K8S-11</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-11</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>Deployment/phi/claims-api</code></td>
+        <td><code>infra/k8s/rendered/sample-ehr.yaml:163</code></td>
+        <td>conftest<br><code>PHI-K8S-11</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-11</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>Deployment/phi/eligibility-api</code></td>
+        <td><code>infra/k8s/rendered/sample-ehr.yaml:258</code></td>
+        <td>conftest<br><code>PHI-K8S-11</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-11</code></td>
+        <td class="sev-MEDIUM">MEDIUM</td>
+        <td><code>Deployment/phi/patient-api</code></td>
+        <td><code>infra/k8s/rendered/sample-ehr.yaml:68</code></td>
+        <td>conftest<br><code>PHI-K8S-11</code></td>
+        <td>no violation</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <h2>45 CFR §164.312(e)(1) — Transmission security</h2>
+  <div class="muted">0 fail · 0 waived · 4 pass</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Status</th><th>Control</th><th>Sev</th><th>Resource</th><th>Location</th><th>Check</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-07</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Namespace/phi</code></td>
+        <td><code>infra/k8s/namespaces.yaml:4</code></td>
+        <td>conftest<br><code>PHI-K8S-07</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-07</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Namespace/phi-reporting</code></td>
+        <td><code>infra/k8s/legacy/reporting-stack.yaml:5</code></td>
+        <td>conftest<br><code>PHI-K8S-07</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-TX-01</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>aws_s3_bucket.legacy_exports</code></td>
+        <td><code>infra/terraform/aws/s3.tf:166</code></td>
+        <td>conftest<br><code>PHI-TX-01</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-TX-01</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>aws_s3_bucket.phi_records</code></td>
+        <td><code>infra/terraform/aws/s3.tf:4</code></td>
+        <td>conftest<br><code>PHI-TX-01</code></td>
+        <td>no violation</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <h2>45 CFR §164.312(e)(2)(ii) — Encryption (transmission, addressable)</h2>
+  <div class="muted">0 fail · 1 waived · 3 pass</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Status</th><th>Control</th><th>Sev</th><th>Resource</th><th>Location</th><th>Check</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="pill WAIVED">WAIVED</span></td>
+        <td><code>PHI-K8S-08</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Ingress/phi-reporting/legacy-reports</code></td>
+        <td><code>infra/k8s/legacy/reporting-stack.yaml:78</code></td>
+        <td>conftest<br><code>PHI-K8S-08</code></td>
+        <td>Ingress has no spec.tls; traffic is served over plain HTTP<div class="note">Waived: infra/k8s/legacy is a scan-only fixture and is never deployed. · owner phi-guard-maintainer · expires 2027-06-30</div></td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-K8S-08</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>Ingress/phi/sample-ehr</code></td>
+        <td><code>infra/k8s/rendered/sample-ehr.yaml:353</code></td>
+        <td>conftest<br><code>PHI-K8S-08</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-TX-02</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>aws_db_instance.legacy_reporting</code></td>
+        <td><code>infra/terraform/aws/rds.tf:61</code></td>
+        <td>conftest<br><code>PHI-TX-02</code></td>
+        <td>no violation</td>
+      </tr>
+      <tr>
+        <td><span class="pill PASS">PASS</span></td>
+        <td><code>PHI-TX-02</code></td>
+        <td class="sev-HIGH">HIGH</td>
+        <td><code>aws_db_instance.phi_primary</code></td>
+        <td><code>infra/terraform/aws/rds.tf:24</code></td>
+        <td>conftest<br><code>PHI-TX-02</code></td>
+        <td>no violation</td>
+      </tr>
+    </tbody>
+  </table></div>
+</main>
+</body>
+</html>

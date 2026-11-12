@@ -1,0 +1,1250 @@
+{
+  "tool": "phi-guard",
+  "framework": "HIPAA Security Rule - 45 CFR \u00a7164.312 Technical Safeguards",
+  "commit": "uncommitted",
+  "generated_at": "2026-11-12T16:25:33+00:00",
+  "banner": "SAMPLE rendered from tests/fixtures (hand-written tool output), not a real scan. Run 'make report'.",
+  "waivers_applied": true,
+  "expired_waivers": [],
+  "tools": {
+    "conftest_tf": {
+      "name": "conftest_tf",
+      "ran": true,
+      "seconds": 0.0,
+      "note": "loaded tests/fixtures/conftest_tf.json"
+    },
+    "conftest_k8s": {
+      "name": "conftest_k8s",
+      "ran": true,
+      "seconds": 0.0,
+      "note": "loaded tests/fixtures/conftest_k8s.json"
+    },
+    "checkov": {
+      "name": "checkov",
+      "ran": true,
+      "seconds": 0.0,
+      "note": "loaded tests/fixtures/checkov.json"
+    }
+  },
+  "duration_seconds": 0.04,
+  "summary": {
+    "controls_defined": 34,
+    "controls_evaluated": 24,
+    "control_status": {
+      "PHI-AC-01": "WAIVED",
+      "PHI-AC-02": "NOT_EVALUATED",
+      "PHI-AC-03": "NOT_EVALUATED",
+      "PHI-AC-04": "NOT_EVALUATED",
+      "PHI-AC-05": "NOT_EVALUATED",
+      "PHI-AC-06": "NOT_EVALUATED",
+      "PHI-ENC-01": "WAIVED",
+      "PHI-ENC-02": "WAIVED",
+      "PHI-ENC-03": "WAIVED",
+      "PHI-ENC-04": "NOT_EVALUATED",
+      "PHI-AU-01": "NOT_EVALUATED",
+      "PHI-AU-02": "PASS",
+      "PHI-AU-03": "NOT_EVALUATED",
+      "PHI-AU-04": "PASS",
+      "PHI-INT-01": "NOT_EVALUATED",
+      "PHI-INT-02": "PASS",
+      "PHI-INT-03": "WAIVED",
+      "PHI-INT-04": "WAIVED",
+      "PHI-AUTH-01": "NOT_EVALUATED",
+      "PHI-AUTH-02": "NOT_EVALUATED",
+      "PHI-TX-01": "PASS",
+      "PHI-TX-02": "PASS",
+      "PHI-TX-03": "NOT_EVALUATED",
+      "PHI-K8S-01": "WAIVED",
+      "PHI-K8S-02": "WAIVED",
+      "PHI-K8S-03": "PASS",
+      "PHI-K8S-04": "NOT_EVALUATED",
+      "PHI-K8S-05": "NOT_EVALUATED",
+      "PHI-K8S-06": "WAIVED",
+      "PHI-K8S-07": "PASS",
+      "PHI-K8S-08": "WAIVED",
+      "PHI-K8S-09": "NOT_EVALUATED",
+      "PHI-K8S-10": "NOT_EVALUATED",
+      "PHI-K8S-11": "PASS"
+    },
+    "results_total": 47,
+    "pass": 37,
+    "fail": 0,
+    "waived": 10,
+    "unwaived_fail_by_severity": {
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 0
+    }
+  },
+  "coverage": [
+    {
+      "control_id": "PHI-AC-01",
+      "engine": "rego",
+      "checks": [
+        "PHI-AC-01"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-AC-02",
+      "engine": "checkov",
+      "checks": [
+        "CKV_AWS_17"
+      ],
+      "evaluated": false
+    },
+    {
+      "control_id": "PHI-AC-03",
+      "engine": "rego",
+      "checks": [
+        "PHI-AC-03"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-AC-04",
+      "engine": "rego",
+      "checks": [
+        "PHI-AC-04"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-AC-05",
+      "engine": "rego",
+      "checks": [
+        "PHI-AC-05"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-AC-06",
+      "engine": "checkov",
+      "checks": [
+        "CKV_AWS_130"
+      ],
+      "evaluated": false
+    },
+    {
+      "control_id": "PHI-ENC-01",
+      "engine": "rego",
+      "checks": [
+        "PHI-ENC-01"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-ENC-02",
+      "engine": "checkov",
+      "checks": [
+        "CKV_AWS_16"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-ENC-03",
+      "engine": "checkov",
+      "checks": [
+        "CKV_AWS_7"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-ENC-04",
+      "engine": "checkov",
+      "checks": [
+        "CKV_AWS_35"
+      ],
+      "evaluated": false
+    },
+    {
+      "control_id": "PHI-AU-01",
+      "engine": "checkov",
+      "checks": [
+        "CKV_AWS_67"
+      ],
+      "evaluated": false
+    },
+    {
+      "control_id": "PHI-AU-02",
+      "engine": "rego",
+      "checks": [
+        "PHI-AU-02"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-AU-03",
+      "engine": "rego",
+      "checks": [
+        "PHI-AU-03"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-AU-04",
+      "engine": "rego",
+      "checks": [
+        "PHI-AU-04"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-INT-01",
+      "engine": "checkov",
+      "checks": [
+        "CKV_AWS_36"
+      ],
+      "evaluated": false
+    },
+    {
+      "control_id": "PHI-INT-02",
+      "engine": "rego",
+      "checks": [
+        "PHI-INT-02"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-INT-03",
+      "engine": "checkov",
+      "checks": [
+        "CKV_PHI_AWS_1"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-INT-04",
+      "engine": "rego",
+      "checks": [
+        "PHI-INT-04"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-AUTH-01",
+      "engine": "checkov",
+      "checks": [
+        "CKV_PHI_AWS_2"
+      ],
+      "evaluated": false
+    },
+    {
+      "control_id": "PHI-AUTH-02",
+      "engine": "rego",
+      "checks": [
+        "PHI-AUTH-02"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-TX-01",
+      "engine": "rego",
+      "checks": [
+        "PHI-TX-01"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-TX-02",
+      "engine": "rego",
+      "checks": [
+        "PHI-TX-02"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-TX-03",
+      "engine": "rego",
+      "checks": [
+        "PHI-TX-03"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-K8S-01",
+      "engine": "checkov",
+      "checks": [
+        "CKV_K8S_16"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-K8S-02",
+      "engine": "rego",
+      "checks": [
+        "PHI-K8S-02"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-K8S-03",
+      "engine": "rego",
+      "checks": [
+        "PHI-K8S-03"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-K8S-04",
+      "engine": "checkov",
+      "checks": [
+        "CKV_K8S_11",
+        "CKV_K8S_13"
+      ],
+      "evaluated": false
+    },
+    {
+      "control_id": "PHI-K8S-05",
+      "engine": "checkov",
+      "checks": [
+        "CKV_K8S_14"
+      ],
+      "evaluated": false
+    },
+    {
+      "control_id": "PHI-K8S-06",
+      "engine": "rego",
+      "checks": [
+        "PHI-K8S-06"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-K8S-07",
+      "engine": "rego",
+      "checks": [
+        "PHI-K8S-07"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-K8S-08",
+      "engine": "rego",
+      "checks": [
+        "PHI-K8S-08"
+      ],
+      "evaluated": true
+    },
+    {
+      "control_id": "PHI-K8S-09",
+      "engine": "checkov",
+      "checks": [
+        "CKV_PHI_K8S_1"
+      ],
+      "evaluated": false
+    },
+    {
+      "control_id": "PHI-K8S-10",
+      "engine": "checkov",
+      "checks": [
+        "CKV_K8S_20"
+      ],
+      "evaluated": false
+    },
+    {
+      "control_id": "PHI-K8S-11",
+      "engine": "rego",
+      "checks": [
+        "PHI-K8S-11"
+      ],
+      "evaluated": true
+    }
+  ],
+  "unmapped_failures": [
+    {
+      "control_id": "UNMAPPED",
+      "resource": "Combined",
+      "file": "Combined",
+      "message": "something without the expected prefix"
+    }
+  ],
+  "results": [
+    {
+      "control_id": "PHI-AC-01",
+      "title": "S3 buckets block all public access",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "WAIVED",
+      "engine": "conftest",
+      "check_id": "PHI-AC-01",
+      "resource": "aws_s3_bucket.legacy_exports",
+      "file": "infra/terraform/aws/s3.tf",
+      "line": 166,
+      "message": "no aws_s3_bucket_public_access_block with all four flags set to true",
+      "finding_id": "F-f4d9ac62",
+      "waiver": {
+        "reason": "Intentional non-compliant Terraform fixture used to demonstrate detection.",
+        "owner": "phi-guard-maintainer",
+        "expires": "2027-06-30"
+      },
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-AC-01",
+      "title": "S3 buckets block all public access",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-AC-01",
+      "resource": "aws_s3_bucket.phi_records",
+      "file": "infra/terraform/aws/s3.tf",
+      "line": 4,
+      "message": "no violation",
+      "finding_id": "F-f8267f78",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-AC-01",
+      "title": "S3 buckets block all public access",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-AC-01",
+      "resource": "aws_s3_bucket.access_logs",
+      "file": "infra/terraform/aws/s3.tf",
+      "line": 64,
+      "message": "no violation",
+      "finding_id": "F-3a17553b",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-ENC-01",
+      "title": "PHI and audit S3 buckets use SSE-KMS with a customer-managed key",
+      "citation": "45 CFR \u00a7164.312(a)(2)(iv)",
+      "safeguard": "Encryption and decryption (addressable)",
+      "severity": "HIGH",
+      "status": "WAIVED",
+      "engine": "conftest",
+      "check_id": "PHI-ENC-01",
+      "resource": "aws_s3_bucket.legacy_exports",
+      "file": "infra/terraform/aws/s3.tf",
+      "line": 166,
+      "message": "bucket is not encrypted with SSE-KMS (aws:kms) using a customer-managed key",
+      "finding_id": "F-96386060",
+      "waiver": {
+        "reason": "Intentional non-compliant Terraform fixture used to demonstrate detection.",
+        "owner": "phi-guard-maintainer",
+        "expires": "2027-06-30"
+      },
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-ENC-01",
+      "title": "PHI and audit S3 buckets use SSE-KMS with a customer-managed key",
+      "citation": "45 CFR \u00a7164.312(a)(2)(iv)",
+      "safeguard": "Encryption and decryption (addressable)",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-ENC-01",
+      "resource": "aws_s3_bucket.phi_records",
+      "file": "infra/terraform/aws/s3.tf",
+      "line": 4,
+      "message": "no violation",
+      "finding_id": "F-303a80e4",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-ENC-02",
+      "title": "RDS storage is encrypted at rest",
+      "citation": "45 CFR \u00a7164.312(a)(2)(iv)",
+      "safeguard": "Encryption and decryption (addressable)",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "checkov",
+      "check_id": "CKV_AWS_16",
+      "resource": "aws_db_instance.phi_primary",
+      "file": "/rds.tf",
+      "line": 24,
+      "message": "Ensure all data stored in the RDS is securely encrypted at rest",
+      "finding_id": "F-7da13744",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-ENC-02",
+      "title": "RDS storage is encrypted at rest",
+      "citation": "45 CFR \u00a7164.312(a)(2)(iv)",
+      "safeguard": "Encryption and decryption (addressable)",
+      "severity": "HIGH",
+      "status": "WAIVED",
+      "engine": "checkov",
+      "check_id": "CKV_AWS_16",
+      "resource": "aws_db_instance.legacy_reporting",
+      "file": "/rds.tf",
+      "line": 63,
+      "message": "Ensure all data stored in the RDS is securely encrypted at rest",
+      "finding_id": "F-eafcf95e",
+      "waiver": {
+        "reason": "Intentional non-compliant Terraform fixture used to demonstrate detection.",
+        "owner": "phi-guard-maintainer",
+        "expires": "2027-06-30"
+      },
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-ENC-03",
+      "title": "KMS customer-managed keys have rotation enabled",
+      "citation": "45 CFR \u00a7164.312(a)(2)(iv)",
+      "safeguard": "Encryption and decryption (addressable)",
+      "severity": "MEDIUM",
+      "status": "WAIVED",
+      "engine": "checkov",
+      "check_id": "CKV_AWS_7",
+      "resource": "aws_kms_key.legacy",
+      "file": "/kms.tf",
+      "line": 16,
+      "message": "Ensure rotation for customer created CMKs is enabled",
+      "finding_id": "F-2ac18cc2",
+      "waiver": {
+        "reason": "Intentional non-compliant Terraform fixture used to demonstrate detection.",
+        "owner": "phi-guard-maintainer",
+        "expires": "2027-06-30"
+      },
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-AU-02",
+      "title": "PHI buckets have server access logging enabled",
+      "citation": "45 CFR \u00a7164.312(b)",
+      "safeguard": "Audit controls",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-AU-02",
+      "resource": "aws_s3_bucket.phi_records",
+      "file": "infra/terraform/aws/s3.tf",
+      "line": 4,
+      "message": "no violation",
+      "finding_id": "F-f2552bd4",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-AU-02",
+      "title": "PHI buckets have server access logging enabled",
+      "citation": "45 CFR \u00a7164.312(b)",
+      "safeguard": "Audit controls",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-AU-02",
+      "resource": "aws_s3_bucket.legacy_exports",
+      "file": "infra/terraform/aws/s3.tf",
+      "line": 166,
+      "message": "no violation",
+      "finding_id": "F-72526289",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-AU-04",
+      "title": "RDS instances export database logs to CloudWatch",
+      "citation": "45 CFR \u00a7164.312(b)",
+      "safeguard": "Audit controls",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-AU-04",
+      "resource": "aws_db_instance.phi_primary",
+      "file": "infra/terraform/aws/rds.tf",
+      "line": 24,
+      "message": "no violation",
+      "finding_id": "F-29e3528e",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-AU-04",
+      "title": "RDS instances export database logs to CloudWatch",
+      "citation": "45 CFR \u00a7164.312(b)",
+      "safeguard": "Audit controls",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-AU-04",
+      "resource": "aws_db_instance.legacy_reporting",
+      "file": "infra/terraform/aws/rds.tf",
+      "line": 61,
+      "message": "no violation",
+      "finding_id": "F-4ae11bdc",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-INT-02",
+      "title": "PHI buckets have versioning enabled",
+      "citation": "45 CFR \u00a7164.312(c)(1)",
+      "safeguard": "Integrity",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-INT-02",
+      "resource": "aws_s3_bucket.phi_records",
+      "file": "infra/terraform/aws/s3.tf",
+      "line": 4,
+      "message": "no violation",
+      "finding_id": "F-1db46d96",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-INT-02",
+      "title": "PHI buckets have versioning enabled",
+      "citation": "45 CFR \u00a7164.312(c)(1)",
+      "safeguard": "Integrity",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-INT-02",
+      "resource": "aws_s3_bucket.legacy_exports",
+      "file": "infra/terraform/aws/s3.tf",
+      "line": 166,
+      "message": "no violation",
+      "finding_id": "F-76abbadc",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-INT-03",
+      "title": "RDS instances have deletion protection",
+      "citation": "45 CFR \u00a7164.312(c)(1)",
+      "safeguard": "Integrity",
+      "severity": "MEDIUM",
+      "status": "WAIVED",
+      "engine": "checkov",
+      "check_id": "CKV_PHI_AWS_1",
+      "resource": "aws_db_instance.legacy_reporting",
+      "file": "/rds.tf",
+      "line": 63,
+      "message": "PHI Guard: RDS instance holding PHI has deletion protection enabled",
+      "finding_id": "F-8fc82341",
+      "waiver": {
+        "reason": "Intentional non-compliant Terraform fixture used to demonstrate detection.",
+        "owner": "phi-guard-maintainer",
+        "expires": "2027-06-30"
+      },
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-INT-04",
+      "title": "RDS backups are retained for at least 7 days",
+      "citation": "45 CFR \u00a7164.312(c)(1)",
+      "safeguard": "Integrity",
+      "severity": "MEDIUM",
+      "status": "WAIVED",
+      "engine": "conftest",
+      "check_id": "PHI-INT-04",
+      "resource": "aws_db_instance.legacy_reporting",
+      "file": "infra/terraform/aws/rds.tf",
+      "line": 61,
+      "message": "backup_retention_period is 1 days (minimum 7)",
+      "finding_id": "F-663584c4",
+      "waiver": {
+        "reason": "Intentional non-compliant Terraform fixture used to demonstrate detection.",
+        "owner": "phi-guard-maintainer",
+        "expires": "2027-06-30"
+      },
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-INT-04",
+      "title": "RDS backups are retained for at least 7 days",
+      "citation": "45 CFR \u00a7164.312(c)(1)",
+      "safeguard": "Integrity",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-INT-04",
+      "resource": "aws_db_instance.phi_primary",
+      "file": "infra/terraform/aws/rds.tf",
+      "line": 24,
+      "message": "no violation",
+      "finding_id": "F-30225758",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-TX-01",
+      "title": "PHI and audit buckets deny non-TLS requests",
+      "citation": "45 CFR \u00a7164.312(e)(1)",
+      "safeguard": "Transmission security",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-TX-01",
+      "resource": "aws_s3_bucket.phi_records",
+      "file": "infra/terraform/aws/s3.tf",
+      "line": 4,
+      "message": "no violation",
+      "finding_id": "F-d545a9b1",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-TX-01",
+      "title": "PHI and audit buckets deny non-TLS requests",
+      "citation": "45 CFR \u00a7164.312(e)(1)",
+      "safeguard": "Transmission security",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-TX-01",
+      "resource": "aws_s3_bucket.legacy_exports",
+      "file": "infra/terraform/aws/s3.tf",
+      "line": 166,
+      "message": "no violation",
+      "finding_id": "F-037aa9d5",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-TX-02",
+      "title": "RDS parameter group forces TLS (rds.force_ssl = 1)",
+      "citation": "45 CFR \u00a7164.312(e)(2)(ii)",
+      "safeguard": "Encryption (transmission, addressable)",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-TX-02",
+      "resource": "aws_db_instance.phi_primary",
+      "file": "infra/terraform/aws/rds.tf",
+      "line": 24,
+      "message": "no violation",
+      "finding_id": "F-1d0de64a",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-TX-02",
+      "title": "RDS parameter group forces TLS (rds.force_ssl = 1)",
+      "citation": "45 CFR \u00a7164.312(e)(2)(ii)",
+      "safeguard": "Encryption (transmission, addressable)",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-TX-02",
+      "resource": "aws_db_instance.legacy_reporting",
+      "file": "infra/terraform/aws/rds.tf",
+      "line": 61,
+      "message": "no violation",
+      "finding_id": "F-c8bea98a",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-01",
+      "title": "Containers are not privileged",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "checkov",
+      "check_id": "CKV_K8S_16",
+      "resource": "Deployment/phi/patient-api",
+      "file": "/rendered/sample-ehr.yaml",
+      "line": 60,
+      "message": "Container should not be privileged",
+      "finding_id": "F-c48cce09",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-01",
+      "title": "Containers are not privileged",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "WAIVED",
+      "engine": "checkov",
+      "check_id": "CKV_K8S_16",
+      "resource": "Deployment/phi-reporting/report-exporter",
+      "file": "/legacy/reporting-stack.yaml",
+      "line": 11,
+      "message": "Container should not be privileged",
+      "finding_id": "F-b0dbba67",
+      "waiver": {
+        "reason": "infra/k8s/legacy is a scan-only fixture and is never deployed.",
+        "owner": "phi-guard-maintainer",
+        "expires": "2027-06-30"
+      },
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-02",
+      "title": "Containers run as non-root",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "WAIVED",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-02",
+      "resource": "Deployment/phi-reporting/report-exporter",
+      "file": "infra/k8s/legacy/reporting-stack.yaml",
+      "line": 12,
+      "message": "container \"exporter\" does not enforce runAsNonRoot",
+      "finding_id": "F-a3fa21ef",
+      "waiver": {
+        "reason": "infra/k8s/legacy is a scan-only fixture and is never deployed.",
+        "owner": "phi-guard-maintainer",
+        "expires": "2027-06-30"
+      },
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-02",
+      "title": "Containers run as non-root",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-02",
+      "resource": "CronJob/phi-reporting/nightly-extract",
+      "file": "infra/k8s/legacy/reporting-stack.yaml",
+      "line": 44,
+      "message": "no violation",
+      "finding_id": "F-5e1c42d6",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-02",
+      "title": "Containers run as non-root",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-02",
+      "resource": "Deployment/phi/patient-api",
+      "file": "infra/k8s/rendered/sample-ehr.yaml",
+      "line": 68,
+      "message": "no violation",
+      "finding_id": "F-a51084ca",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-02",
+      "title": "Containers run as non-root",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-02",
+      "resource": "Deployment/phi/claims-api",
+      "file": "infra/k8s/rendered/sample-ehr.yaml",
+      "line": 163,
+      "message": "no violation",
+      "finding_id": "F-53e56676",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-02",
+      "title": "Containers run as non-root",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-02",
+      "resource": "Deployment/phi/eligibility-api",
+      "file": "infra/k8s/rendered/sample-ehr.yaml",
+      "line": 258,
+      "message": "no violation",
+      "finding_id": "F-cf5efba5",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-03",
+      "title": "Containers use a read-only root filesystem",
+      "citation": "45 CFR \u00a7164.312(c)(1)",
+      "safeguard": "Integrity",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-03",
+      "resource": "Deployment/phi-reporting/report-exporter",
+      "file": "infra/k8s/legacy/reporting-stack.yaml",
+      "line": 12,
+      "message": "no violation",
+      "finding_id": "F-fe15b832",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-03",
+      "title": "Containers use a read-only root filesystem",
+      "citation": "45 CFR \u00a7164.312(c)(1)",
+      "safeguard": "Integrity",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-03",
+      "resource": "CronJob/phi-reporting/nightly-extract",
+      "file": "infra/k8s/legacy/reporting-stack.yaml",
+      "line": 44,
+      "message": "no violation",
+      "finding_id": "F-84abe671",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-03",
+      "title": "Containers use a read-only root filesystem",
+      "citation": "45 CFR \u00a7164.312(c)(1)",
+      "safeguard": "Integrity",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-03",
+      "resource": "Deployment/phi/patient-api",
+      "file": "infra/k8s/rendered/sample-ehr.yaml",
+      "line": 68,
+      "message": "no violation",
+      "finding_id": "F-313277b2",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-03",
+      "title": "Containers use a read-only root filesystem",
+      "citation": "45 CFR \u00a7164.312(c)(1)",
+      "safeguard": "Integrity",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-03",
+      "resource": "Deployment/phi/claims-api",
+      "file": "infra/k8s/rendered/sample-ehr.yaml",
+      "line": 163,
+      "message": "no violation",
+      "finding_id": "F-7d75401b",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-03",
+      "title": "Containers use a read-only root filesystem",
+      "citation": "45 CFR \u00a7164.312(c)(1)",
+      "safeguard": "Integrity",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-03",
+      "resource": "Deployment/phi/eligibility-api",
+      "file": "infra/k8s/rendered/sample-ehr.yaml",
+      "line": 258,
+      "message": "no violation",
+      "finding_id": "F-37c4b0ed",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-06",
+      "title": "No hard-coded secrets in container environment variables",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "WAIVED",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-06",
+      "resource": "Deployment/phi-reporting/report-exporter",
+      "file": "infra/k8s/legacy/reporting-stack.yaml",
+      "line": 12,
+      "message": "container \"exporter\" sets DB_PASSWORD to a literal value; mount a Secret as a file instead",
+      "finding_id": "F-01b95d72",
+      "waiver": {
+        "reason": "infra/k8s/legacy is a scan-only fixture and is never deployed.",
+        "owner": "phi-guard-maintainer",
+        "expires": "2027-06-30"
+      },
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-06",
+      "title": "No hard-coded secrets in container environment variables",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-06",
+      "resource": "CronJob/phi-reporting/nightly-extract",
+      "file": "infra/k8s/legacy/reporting-stack.yaml",
+      "line": 44,
+      "message": "no violation",
+      "finding_id": "F-7f33f4f0",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-06",
+      "title": "No hard-coded secrets in container environment variables",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-06",
+      "resource": "Deployment/phi/patient-api",
+      "file": "infra/k8s/rendered/sample-ehr.yaml",
+      "line": 68,
+      "message": "no violation",
+      "finding_id": "F-924d0a90",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-06",
+      "title": "No hard-coded secrets in container environment variables",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-06",
+      "resource": "Deployment/phi/claims-api",
+      "file": "infra/k8s/rendered/sample-ehr.yaml",
+      "line": 163,
+      "message": "no violation",
+      "finding_id": "F-05b56835",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-06",
+      "title": "No hard-coded secrets in container environment variables",
+      "citation": "45 CFR \u00a7164.312(a)(1)",
+      "safeguard": "Access control",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-06",
+      "resource": "Deployment/phi/eligibility-api",
+      "file": "infra/k8s/rendered/sample-ehr.yaml",
+      "line": 258,
+      "message": "no violation",
+      "finding_id": "F-7bcd0021",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-07",
+      "title": "PHI namespaces have a default-deny NetworkPolicy",
+      "citation": "45 CFR \u00a7164.312(e)(1)",
+      "safeguard": "Transmission security",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-07",
+      "resource": "Namespace/phi-reporting",
+      "file": "infra/k8s/legacy/reporting-stack.yaml",
+      "line": 5,
+      "message": "no violation",
+      "finding_id": "F-d3edaded",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-07",
+      "title": "PHI namespaces have a default-deny NetworkPolicy",
+      "citation": "45 CFR \u00a7164.312(e)(1)",
+      "safeguard": "Transmission security",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-07",
+      "resource": "Namespace/phi",
+      "file": "infra/k8s/namespaces.yaml",
+      "line": 4,
+      "message": "no violation",
+      "finding_id": "F-58978a3f",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-08",
+      "title": "Ingresses terminate TLS",
+      "citation": "45 CFR \u00a7164.312(e)(2)(ii)",
+      "safeguard": "Encryption (transmission, addressable)",
+      "severity": "HIGH",
+      "status": "WAIVED",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-08",
+      "resource": "Ingress/phi-reporting/legacy-reports",
+      "file": "infra/k8s/legacy/reporting-stack.yaml",
+      "line": 78,
+      "message": "Ingress has no spec.tls; traffic is served over plain HTTP",
+      "finding_id": "F-adaa5138",
+      "waiver": {
+        "reason": "infra/k8s/legacy is a scan-only fixture and is never deployed.",
+        "owner": "phi-guard-maintainer",
+        "expires": "2027-06-30"
+      },
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-08",
+      "title": "Ingresses terminate TLS",
+      "citation": "45 CFR \u00a7164.312(e)(2)(ii)",
+      "safeguard": "Encryption (transmission, addressable)",
+      "severity": "HIGH",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-08",
+      "resource": "Ingress/phi/sample-ehr",
+      "file": "infra/k8s/rendered/sample-ehr.yaml",
+      "line": 353,
+      "message": "no violation",
+      "finding_id": "F-e14ab9ad",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-11",
+      "title": "Pods do not auto-mount service account tokens",
+      "citation": "45 CFR \u00a7164.312(d)",
+      "safeguard": "Person or entity authentication",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-11",
+      "resource": "Deployment/phi-reporting/report-exporter",
+      "file": "infra/k8s/legacy/reporting-stack.yaml",
+      "line": 12,
+      "message": "no violation",
+      "finding_id": "F-7d029c65",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-11",
+      "title": "Pods do not auto-mount service account tokens",
+      "citation": "45 CFR \u00a7164.312(d)",
+      "safeguard": "Person or entity authentication",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-11",
+      "resource": "CronJob/phi-reporting/nightly-extract",
+      "file": "infra/k8s/legacy/reporting-stack.yaml",
+      "line": 44,
+      "message": "no violation",
+      "finding_id": "F-c446ed65",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-11",
+      "title": "Pods do not auto-mount service account tokens",
+      "citation": "45 CFR \u00a7164.312(d)",
+      "safeguard": "Person or entity authentication",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-11",
+      "resource": "Deployment/phi/patient-api",
+      "file": "infra/k8s/rendered/sample-ehr.yaml",
+      "line": 68,
+      "message": "no violation",
+      "finding_id": "F-79ff33f9",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-11",
+      "title": "Pods do not auto-mount service account tokens",
+      "citation": "45 CFR \u00a7164.312(d)",
+      "safeguard": "Person or entity authentication",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-11",
+      "resource": "Deployment/phi/claims-api",
+      "file": "infra/k8s/rendered/sample-ehr.yaml",
+      "line": 163,
+      "message": "no violation",
+      "finding_id": "F-786bab9d",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    },
+    {
+      "control_id": "PHI-K8S-11",
+      "title": "Pods do not auto-mount service account tokens",
+      "citation": "45 CFR \u00a7164.312(d)",
+      "safeguard": "Person or entity authentication",
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "engine": "conftest",
+      "check_id": "PHI-K8S-11",
+      "resource": "Deployment/phi/eligibility-api",
+      "file": "infra/k8s/rendered/sample-ehr.yaml",
+      "line": 258,
+      "message": "no violation",
+      "finding_id": "F-57b2d9d2",
+      "waiver": null,
+      "commit": "uncommitted",
+      "timestamp": "2026-11-12T16:25:33+00:00"
+    }
+  ]
+}
